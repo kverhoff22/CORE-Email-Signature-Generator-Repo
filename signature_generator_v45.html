@@ -547,12 +547,6 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         templateType: 'theCoreGroup',
         emailDomain: 'coreltd.com'
       },
-      // CORE affiliated group - CORE Disaster Services (CDS)
-      CDS: {
-        label: 'CDS',
-        templateType: 'cds',
-        emailDomain: 'coreconstruction.com'
-      },
       // External managed company - PROCEDEO
       PROCEDEO: {
         label: 'PROCEDEO',
@@ -587,7 +581,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     const stateOptionGroups = [
       {
         label: 'CORE',
-        options: ['Arizona', 'Florida', 'Texas', 'Midwest', 'West', 'CCG', 'TheCOREGroup', 'CDS']
+        options: ['Arizona', 'Florida', 'Texas', 'Midwest', 'West', 'CCG', 'TheCOREGroup']
       },
       {
         label: 'External',
@@ -861,15 +855,6 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const theCoreGroupCompanyStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${theCoreGroupGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
       const theCoreGroupSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
 
-      // ----- CDS template styles -----
-      const cdsGrey = "rgb(77, 77, 77)";
-      const cdsSoftGrey = "rgb(189, 190, 192)";
-      const cdsBaseLine = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${cdsGrey}; line-height: 1.25; margin: 0;`;
-      const cdsNameStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${cdsGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
-      const cdsTitleStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${cdsGrey}; line-height: 1.25; margin: 0;`;
-      const cdsCompanyStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${cdsGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
-      const cdsSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
-
       // ----- PROCEDEO template styles -----
       const procedeoGrey = "rgb(101, 102, 101)";
       const procedeoNameStyle = `font-family: Calibri, Arial, sans-serif; font-size: 12pt; font-weight: 700; color: ${procedeoGrey}; line-height: 1.15; margin: 0;`;
@@ -938,22 +923,6 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
             <div style="${gaBaseLine}">${type === 'new' ? `T: 309-284-8676 | F: 309-263-8004 | C: ${escapedCellDisplay}` : `T: XXX-XXX-XXXX | C: ${escapedCellDisplay}`}</div>
             ${type === 'new' ? `<div style="${gaBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${gaGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
             ${type === 'new' ? `${gaSpacerLine}<div style="${gaBaseLine}">${gaDisclaimerText}</div>` : ''}
-          </div>
-        `.trim();
-      }
-
-      // CDS template branch
-      if (activeConfig.templateType === 'cds') {
-        return `
-          <div style="font-family: 'Segoe UI', Arial, sans-serif; color: ${cdsGrey}; line-height: 1.25;">
-            <div style="${cdsNameStyle}">${escapeHtml(name)}</div>
-            <div style="${cdsTitleStyle}">${escapeHtml(title)}</div>
-            ${cdsSpacerLine}
-            <div style="${cdsCompanyStyle}"><span style="color: rgb(0, 131, 72);">CORE</span> Disaster Services</div>
-            ${type === 'new' ? `<div style="${cdsBaseLine}">8550 United Plaza, Suite 620 | Baton Rouge, LA 70809</div>` : ''}
-            <div style="${cdsBaseLine}">${type === 'new' ? `P: 225-831-6350 | F: 225-831-6351 | C: ${escapedCellDisplay}` : `C: ${escapedCellDisplay} | W: COREconstruction.com`}</div>
-            ${type === 'new' ? `<div style="${cdsBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${cdsGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
-            ${type === 'new' ? `<div style="${cdsBaseLine}">W: COREconstruction.com</div>` : ''}
           </div>
         `.trim();
       }
