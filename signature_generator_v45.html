@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CORE Signature Generator</title>
+  <style>
+
+    /* =========================
+       PAGE / THEME COLORS
+       ========================= */
+
+    /* Core page colors reused throughout the UI */
+    :root {
+      --core-green: rgb(0, 131, 72);
+      --core-gray: rgb(77, 77, 77);
+      --bg: #f0f7f4;
+      --card: #ffffff;
+      --border: #b2b2b2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(160deg, #d1f0f9 0%, #d3fbe2 100%);
+      color: #111;
+    }
+
+    /* =========================
+       TOP HEADER / BRANDING
+       ========================= */
+    .wrap {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 20px;
+    }
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+    .brand-logo {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      background: transparent;
+      padding: 0;
+      box-shadow: none;
+      flex: 0 0 auto;
+    }
+    .brand-text {
+      min-width: 0;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+    .sub {
+      color: #444;
+      margin-bottom: 6px;
+    }
+    .sub-note {
+      color: #666;
+      font-size: 12px;
+      font-style: italic;
+      margin-top: 2px;
+      margin-bottom: 24px;
+    }
+    /* =========================
+       MAIN LAYOUT CARDS
+       ========================= */
+    .grid {
+      /* Two-column desktop layout: form on the left, previews on the right */
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .form-column {
+      min-width: 0;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 12px 0 6px;
+    }
+    /* =========================
+       FORM FIELDS / INPUT STATES
+       ========================= */
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #c8ced6;
+      border-radius: 10px;
+      font: inherit;
+      background: #fff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    }
+    @keyframes pendingPulse {
+      0%, 100% {
+        border-color: #e2edfb;
+        background: #f8fafd;
+        box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.08);
+      }
+      50% {
+        border-color: #9fc9fb;
+        background: #eaf4ff;
+        box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.14);
+      }
+    }
+    input.pending, select.pending {
+      /* JS sets the delay variable so all active pending fields pulse together */
+      animation: pendingPulse 2.6s ease-in-out infinite;
+      animation-delay: var(--pending-animation-delay, 0ms);
+    }
+    input.invalid, select.invalid {
+      border-color: #d92d20;
+      background: #fff1f0;
+      box-shadow: 0 0 0 3px rgba(217, 45, 32, 0.12);
+    }
+    input:disabled, select:disabled {
+      background: #f1f3f5;
+      color: #8a8f98;
+      border-color: #d6dbe1;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .checkbox-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .checkbox-row input {
+      width: auto;
+      margin: 0;
+    }
+    .muted {
+      color: #666;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    /* =========================
+       BUTTONS / ACTIONS
+       ========================= */
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+    }
+    .copy-ready {
+      background: linear-gradient(180deg, #c9f0d7 0%, #08c852 100%);
+      box-shadow: 0 0 0 3px rgba(0, 131, 72, 0.30), 0 8px 18px rgba(0, 131, 72, 0.14);
+    }
+    .copy-ready:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 3px rgba(0, 131, 72, 0.5), 0 12px 22px rgba(0, 131, 72, 0.18);
+    }
+    .download-ready {
+      background: linear-gradient(180deg, #b8cff8 0%, #2d64c7 100%);
+      box-shadow: 0 0 0 3px rgba(33, 78, 180, 0.42), 0 8px 18px rgba(33, 78, 180, 0.20);
+    }
+    .download-ready:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 3px rgba(33, 78, 180, 0.58), 0 12px 22px rgba(33, 78, 180, 0.24);
+    }
+    .validation-note {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid #f0df9a;
+      border-radius: 10px;
+      background: linear-gradient(180deg, #fff9e8 0%, #fff5d8 100%);
+      color: #6b5a13;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .download-note {
+      color: #666;
+      font-size: 12px;
+      line-height: 1.35;
+      margin-top: 8px;
+    }
+    .primary {
+      background: var(--core-green);
+      color: white;
+    }
+    .secondary {
+      background: #e8ecef;
+      color: #111;
+    }
+    .sample-tools {
+      /* Internal/testing helper sits outside the main form card on purpose */
+      margin-top: 18px;
+      text-align: center;
+    }
+    .sample-button {
+      background: #5f95e7;
+      color: #ffffff;
+      font-size: 14px;
+      padding: 8px 12px;
+      box-shadow: 0 6px 14px rgba(95, 149, 231, 0.18);
+      text-shadow: 0 1px 1px rgba(18, 68, 146, 0.28);
+    }
+    .sample-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(95, 149, 231, 0.24);
+    }
+    /* =========================
+       OUTPUT PANELS / STATUS BOXES
+       ========================= */
+    .output-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .output-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .sig-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      padding: 18px;
+      min-height: 150px;
+      margin-bottom: 18px;
+    }
+    .hint {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
+    }
+    .status {
+      display: none;
+      font-size: 12px;
+      font-weight: 400;
+      min-height: 0;
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      line-height: 1.35;
+    }
+    .status-success {
+      display: block;
+      color: rgb(0, 131, 72);
+      border: 1px solid rgba(0, 131, 72, 0.18);
+      background: linear-gradient(180deg, #eef9f2 0%, #e3f5ea 100%);
+    }
+    .status-error {
+      display: block;
+      color: #b42318;
+      border: 1px solid rgba(180, 35, 24, 0.18);
+      background: linear-gradient(180deg, #fff4f2 0%, #ffe9e6 100%);
+    }
+    .status-neutral {
+      display: block;
+      color: #4f5560;
+      border: 1px solid rgba(120, 128, 140, 0.20);
+      background: linear-gradient(180deg, #f3f5f7 0%, #e9edf1 100%);
+    }
+    /* =========================
+       PREVIEW AREA DEFAULT STYLES
+       (used mainly for the on-page preview boxes)
+       ========================= */
+    .sig-preview {
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--core-gray);
+      line-height: 1.25;
+    }
+    .sig-preview .name,
+    .sig-preview .company {
+      font-size: 10pt;
+      font-weight: 700;
+    }
+    .sig-preview .name {
+      color: var(--core-gray);
+      margin-bottom: 2px;
+    }
+    .sig-preview .title,
+    .sig-preview .line,
+    .sig-preview .line a {
+      font-size: 9pt;
+      color: var(--core-gray);
+      text-decoration: none;
+    }
+    .sig-preview .title { margin-bottom: 10px; }
+    .sig-preview .company .core { color: var(--core-green); }
+    .sig-preview .company { margin-bottom: 2px; }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- =========================
+       PAGE WRAPPER
+       ========================= -->
+  <div class="wrap">
+    <!-- Top logo + page title -->
+    <div class="brand-header">
+      <img class="brand-logo" src="data:image/png;base64,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" alt="CORE logo" />
+      <div class="brand-text">
+        <h1>CORE Signature Generator</h1>
+        <div class="sub">Enter the employee info, then copy the finished signature for new messages and replies.</div>
+        <div class="sub-note">* Employee name and Job title are automatically correctly capitalized.</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- =========================
+           LEFT COLUMN: USER INPUT FORM
+           ========================= -->
+      <div class="form-column">
+        <div class="card">
+          <label for="employeeName">Employee name</label>
+          <input id="employeeName" type="text" placeholder="John Smith" />
+
+          <div class="checkbox-row">
+            <input id="includePostNominal" type="checkbox" />
+            <label for="includePostNominal" style="margin:0; font-weight:600;">Include post-nominal letters</label>
+          </div>
+          <input id="postNominal" type="text" placeholder="LEED AP" disabled />
+
+          <label for="jobTitle">Job title</label>
+          <input id="jobTitle" type="text" placeholder="Payroll Manager" />
+
+          <label for="state">State/Group</label>
+          <select id="state">
+            <option value="" selected disabled hidden>Select</option>
+          </select>
+
+          <label for="city" id="cityLabel">City</label>
+          <select id="city" disabled>
+            <option value="" selected disabled hidden>Select</option>
+          </select>
+
+          <label for="cellPhone">Cell phone number (optional)</label>
+          <input id="cellPhone" type="text" placeholder="1234567890 or 123-456-7890" />
+
+          <div class="actions">
+            <button class="primary" id="generateBtn">Generate signatures</button>
+            <button class="secondary" id="clearBtn" type="button">Clear</button>
+          </div>
+          <div class="status" id="formStatus"></div>
+        </div>
+
+        <!-- Small internal-use shortcut for quick visual/template testing -->
+        <div class="sample-tools">
+          <button class="sample-button" id="sampleBtn" type="button">Load sample employee</button>
+        </div>
+      </div>
+
+      <div>
+        <!-- =========================
+             RIGHT COLUMN: GENERATED OUTPUTS
+             ========================= -->
+        <div class="card">
+          <div class="output-header">
+            <div class="output-title">Composing a new message</div>
+            <button class="secondary" id="copyNewBtn" type="button">Copy new-message signature</button>
+          </div>
+          <div class="validation-note" id="validationNote">***Validate the office phone number to ensure it is current***</div>
+          <div class="sig-box">
+            <div id="newPreview" class="sig-preview"></div>
+          </div>
+          <div class="hint"></div>
+          <div class="status" id="newStatus"></div>
+          <div class="status" id="pasteStatus"></div>
+        </div>
+
+        <!-- Reply signature preview -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="output-header">
+            <div class="output-title">Replying to a message</div>
+            <button class="secondary" id="copyReplyBtn" type="button">Copy reply signature</button>
+          </div>
+          <div class="sig-box">
+            <div id="replyPreview" class="sig-preview"></div>
+          </div>
+          <div class="hint"></div>
+          <div class="status" id="replyStatus"></div>
+        </div>
+
+        <!-- Word-compatible download panel -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="output-header">
+            <div class="output-title">Download as a Word document</div>
+            <button class="secondary" id="downloadDocBtn" type="button">Download Word document (.doc)</button>
+          </div>
+          <div class="download-note">Downloads a simple Word-compatible document with both signatures.</div>
+          <div class="status" id="downloadDocStatus"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    
+    /* =========================
+       EMBEDDED IMAGE ASSETS
+       ========================= */
+const PROCEDEO_LOGO = "data:image/png;base64,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";
+
+    /* =========================
+       CORE LOCATION CONFIGURATION
+       These are the CORE offices that need a City
+       selection and an office phone number.
+       ========================= */
+    const CORE_LOCATION_CONFIGS = {
+      // CORE - Arizona offices
+      Arizona: {
+        label: 'Arizona',
+        templateType: 'core',
+        website: 'coreconstruction.com',
+        emailDomain: 'coreconstruction.com',
+        companyHtml: '<span style="color: rgb(0, 131, 72);">CORE</span> Construction | Arizona',
+        officePhoneLabel: 'P',
+        cityOptions: [
+          { value: 'Scottsdale, AZ', label: 'Scottsdale, AZ', phone: '602-494-0800' },
+          { value: 'Flagstaff, AZ', label: 'Flagstaff, AZ', phone: '928-433-4919' },
+          { value: 'Tempe, AZ', label: 'Tempe, AZ', phone: '480-921-2540' },
+          { value: 'Tucson, AZ', label: 'Tucson, AZ', phone: '520-790-5413' },
+          { value: 'Yuma, AZ', label: 'Yuma, AZ', phone: '928-248-3110' }
+        ]
+      },
+      // CORE - Florida offices
+      Florida: {
+        label: 'Florida',
+        templateType: 'core',
+        website: 'coreconstruction.com',
+        emailDomain: 'coreconstruction.com',
+        companyHtml: '<span style="color: rgb(0, 131, 72);">CORE</span> Construction | Florida',
+        officePhoneLabel: 'P',
+        cityOptions: [
+          { value: 'Fort Lauderdale, FL', label: 'Fort Lauderdale, FL', phone: '954-206-1824' },
+          { value: 'Orlando, FL', label: 'Orlando, FL', phone: '407-519-1390' },
+          { value: 'Sarasota/Bradenton, FL', label: 'Sarasota/Bradenton, FL', phone: '941-343-4300' },
+          { value: 'West Palm Beach, FL', label: 'West Palm Beach, FL', phone: '754-600-4723' }
+        ]
+      },
+      // CORE - Texas offices
+      Texas: {
+        label: 'Texas',
+        templateType: 'core',
+        website: 'coreconstruction.com',
+        emailDomain: 'coreconstruction.com',
+        companyHtml: '<span style="color: rgb(0, 131, 72);">CORE</span> Construction | Texas',
+        officePhoneLabel: 'P',
+        cityOptions: [
+          { value: 'Frisco, TX', label: 'Frisco, TX', phone: '972-668-9340' },
+          { value: 'Austin, TX', label: 'Austin, TX', phone: '737-239-0600' }
+        ]
+      },
+      // CORE - Midwest offices / locations
+      Midwest: {
+        label: 'Midwest',
+        templateType: 'core',
+        website: 'coreconstruction.com',
+        emailDomain: 'coreconstruction.com',
+        officePhoneLabel: 'P',
+        cityOptions: [
+          {
+            value: 'Chicago, IL',
+            label: 'Chicago, IL',
+            phone: '331-284-5323',
+            companyHtml: '<span style="color: rgb(0, 131, 72);">CORE</span> Construction Services of Illinois, Inc. | Midwest'
+          },
+          {
+            value: 'Peoria, IL',
+            label: 'Peoria, IL',
+            phone: '309-404-4700',
+            companyHtml: '<span style="color: rgb(0, 131, 72);">CORE</span> Construction Services of Illinois, Inc. | Midwest'
+          },
+          {
+            value: 'Indianapolis, IN',
+            label: 'Indianapolis, IN',
+            phone: '463-212-7674',
+            companyHtml: '<span style="color: rgb(0, 131, 72);">CORE</span> Construction | Midwest'
+          },
+          {
+            value: 'Schererville, IN',
+            label: 'Schererville, IN',
+            phone: '219-961-4325',
+            companyHtml: '<span style="color: rgb(0, 131, 72);">CORE</span> Construction | Midwest'
+          },
+          {
+            value: 'Grand Rapids, MI',
+            label: 'Grand Rapids, MI',
+            phone: '616-929-4020',
+            companyHtml: '<span style="color: rgb(0, 131, 72);">CORE</span> Construction | Midwest'
+          }
+        ]
+      },
+      // CORE - West offices
+      West: {
+        label: 'West',
+        templateType: 'core',
+        website: 'coreconstruction.com',
+        emailDomain: 'coreconstruction.com',
+        companyHtml: '<span style="color: rgb(0, 131, 72);">CORE</span> Construction | West',
+        officePhoneLabel: 'P',
+        cityOptions: [
+          { value: 'Roseville, CA', label: 'Roseville, CA', phone: '530-883-8250' },
+          { value: 'Pleasanton, CA', label: 'Pleasanton, CA', phone: '925-401-5290' },
+          { value: 'San Diego, CA', label: 'San Diego, CA', phone: '619-842-1670' },
+          { value: 'Ontario, CA', label: 'Ontario, CA', phone: '909-757-6599' },
+          { value: 'Emeryville, CA', label: 'Emeryville, CA', phone: '510-999-9667' },
+          { value: 'Boise, ID', label: 'Boise, ID', phone: '208-314-1377' },
+          { value: 'Las Vegas, NV', label: 'Las Vegas, NV', phone: '702-794-0550' },
+          { value: 'Reno, NV', label: 'Reno, NV', phone: '775-525-5757' }
+        ]
+      },
+    };
+
+    /* =========================
+       SPECIAL SIGNATURE CONFIGURATION
+       These groups use custom templates and do not
+       need a City selection.
+       ========================= */
+    const SPECIAL_SIGNATURE_CONFIGS = {
+      // CORE affiliated group - The CORE Group
+      TheCOREGroup: {
+        label: 'The CORE Group',
+        templateType: 'theCoreGroup',
+        emailDomain: 'coreltd.com'
+      },
+      // CORE affiliated group - CORE Disaster Services (CDS)
+      CDS: {
+        label: 'CDS',
+        templateType: 'cds',
+        emailDomain: 'coreconstruction.com'
+      },
+      // External managed company - PROCEDEO
+      PROCEDEO: {
+        label: 'PROCEDEO',
+        templateType: 'procedeo',
+        emailDomain: 'procedeogroup.com',
+        logoDataUri: PROCEDEO_LOGO
+      },
+      // CORE affiliated group - CCG / Core Construction Services
+      CCG: {
+        label: 'CCG',
+        templateType: 'ccg',
+        emailDomain: 'ccg-services.com'
+      },
+      // External managed company - Glenn Allen
+      GlennAllen: {
+        label: 'Glenn Allen',
+        templateType: 'glennAllen',
+        emailDomain: 'gaisb.com'
+      }
+    };
+
+    /*
+      Combined lookup used by dropdown, validation, and signature rendering.
+      The dropdown values are keys into this object, not the visible labels.
+    */
+    const stateConfigs = {
+      ...CORE_LOCATION_CONFIGS,
+      ...SPECIAL_SIGNATURE_CONFIGS
+    };
+
+    /* Controls the grouped sections and ordering inside the State/Group dropdown */
+    const stateOptionGroups = [
+      {
+        label: 'CORE',
+        options: ['Arizona', 'Florida', 'Texas', 'Midwest', 'West', 'CCG', 'TheCOREGroup', 'CDS']
+      },
+      {
+        label: 'External',
+        options: ['PROCEDEO', 'GlennAllen']
+      }
+    ];
+
+    /* =========================
+       DOM REFERENCES
+       ========================= */
+    const employeeName = document.getElementById('employeeName');
+    const includePostNominal = document.getElementById('includePostNominal');
+    const postNominal = document.getElementById('postNominal');
+    const jobTitle = document.getElementById('jobTitle');
+    const state = document.getElementById('state');
+    const city = document.getElementById('city');
+    const cityLabel = document.getElementById('cityLabel');
+    const cellPhone = document.getElementById('cellPhone');
+    const newPreview = document.getElementById('newPreview');
+    const replyPreview = document.getElementById('replyPreview');
+    const formStatus = document.getElementById('formStatus');
+    const newStatus = document.getElementById('newStatus');
+    const replyStatus = document.getElementById('replyStatus');
+    const pasteStatus = document.getElementById('pasteStatus');
+    const downloadDocStatus = document.getElementById('downloadDocStatus');
+    const copyNewBtn = document.getElementById('copyNewBtn');
+    const copyReplyBtn = document.getElementById('copyReplyBtn');
+    const downloadDocBtn = document.getElementById('downloadDocBtn');
+    const validationNote = document.getElementById('validationNote');
+    const sampleBtn = document.getElementById('sampleBtn');
+    const PENDING_PULSE_DURATION_MS = 2600;
+
+    /* Basic text cleanup helpers */
+    function collapseSpaces(value) {
+      return String(value || '').replace(/\s+/g, ' ').trim();
+    }
+
+    /* Build the State/Group dropdown options */
+    function populateStateOptions() {
+      state.innerHTML = '<option value="" selected disabled hidden>Select</option>';
+
+      stateOptionGroups.forEach(group => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = group.label;
+
+        group.options.forEach(key => {
+          const option = document.createElement('option');
+          option.value = key;
+          option.textContent = stateConfigs[key].label;
+          optgroup.appendChild(option);
+        });
+
+        state.appendChild(optgroup);
+      });
+    }
+
+    /* Reset the City dropdown with a placeholder option */
+    function setCityPlaceholder(text) {
+      city.innerHTML = '';
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = text;
+      option.selected = true;
+      option.disabled = true;
+      option.hidden = true;
+      city.appendChild(option);
+    }
+
+    /* Get the currently selected top-level config */
+    function getSelectedConfig() {
+      return stateConfigs[state.value] || null;
+    }
+
+    /* Get the final active config, merging in the selected city when needed */
+    function getSelectedLocationConfig() {
+      const config = getSelectedConfig();
+      if (!config) return null;
+      if (!config.cityOptions || !config.cityOptions.length) return config;
+      const selectedCity = config.cityOptions.find(option => option.value === city.value);
+      return selectedCity ? { ...config, ...selectedCity } : config;
+    }
+
+    /* Enable / disable dependent fields when State/Group changes */
+    function syncDependentFields() {
+      const config = getSelectedConfig();
+
+      if (!config) {
+        // No State/Group selected yet, so City stays unavailable.
+        cityLabel.textContent = 'City';
+        city.disabled = true;
+        setCityPlaceholder('Select');
+      } else if (config.cityOptions && config.cityOptions.length) {
+        // Location-based CORE templates need a city so the office phone can be selected.
+        cityLabel.textContent = config.cityLabel || 'City';
+        city.disabled = false;
+        const previousValue = city.value;
+
+        setCityPlaceholder('Select');
+        config.cityOptions.forEach(optionData => {
+          const option = document.createElement('option');
+          option.value = optionData.value;
+          option.textContent = optionData.label;
+          city.appendChild(option);
+        });
+
+        if (config.defaultCity) {
+          city.value = config.defaultCity;
+        } else if (config.cityOptions.some(option => option.value === previousValue)) {
+          // Preserve the selected city when possible while switching around.
+          city.value = previousValue;
+        } else {
+          city.value = '';
+        }
+      } else {
+        // Special templates such as PROCEDEO and Glenn Allen do not use city selection.
+        cityLabel.textContent = 'City';
+        city.disabled = true;
+        setCityPlaceholder('Not needed');
+      }
+
+      // The post-nominal field only participates when its checkbox is selected.
+      postNominal.disabled = !includePostNominal.checked;
+      if (!includePostNominal.checked) postNominal.value = '';
+    }
+
+    includePostNominal.addEventListener('change', () => {
+      syncDependentFields();
+    });
+
+    /*
+      Auto-capitalized terms used while title-casing job titles.
+      Keep this list to short, common business/technology acronyms so normal
+      words still title-case naturally.
+    */
+    const NAME_CAPITALIZED_TERMS = new Set(['it']);
+    const JOB_TITLE_CAPITALIZED_TERMS = new Set([
+      'it',
+      'ceo',
+      'cfo',
+      'coo',
+      'cto',
+      'cio',
+      'cmo',
+      'chro',
+      'cpo',
+      'cso',
+      'cro',
+      'vp',
+      'svp',
+      'evp',
+      'pmo',
+      'r&d',
+      'hr',
+      'qa',
+      'qc',
+      'bim',
+      'vdc',
+      'mep',
+      'cad',
+      'erp',
+      'crm',
+      'ehs',
+      'hse'
+    ]);
+
+    function titleCaseWord(word, capitalizedTerms) {
+      if (!word) return '';
+      if (capitalizedTerms.has(word)) return word.toUpperCase();
+      // Re-run title casing inside common separators so "cto-vdc" becomes "CTO-VDC".
+      if (word.includes('-')) return word.split('-').map(part => titleCaseWord(part, capitalizedTerms)).join('-');
+      if (word.includes('/')) return word.split('/').map(part => titleCaseWord(part, capitalizedTerms)).join('/');
+      if (word.includes("'")) return word.split("'").map(part => titleCaseWord(part, capitalizedTerms)).join("'");
+      return word[0].toUpperCase() + word.slice(1);
+    }
+
+    /* Auto-capitalize user-entered names and job titles */
+    function toTitleCase(value, capitalizedTerms = NAME_CAPITALIZED_TERMS) {
+      return collapseSpaces(value)
+        .toLowerCase()
+        .split(' ')
+        .filter(Boolean)
+        .map(word => titleCaseWord(word, capitalizedTerms))
+        .join(' ');
+    }
+
+    /* Build the employee email from the entered name + configured domain */
+    function buildEmailFromName(name, domain) {
+      return name
+        .normalize('NFKD')
+        .replace(/[^\w\s-]/g, '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '') + '@' + domain;
+    }
+
+    /* Normalize phone numbers into XXX-XXX-XXXX when possible */
+    function formatPhone(value) {
+      const digits = (value || '').replace(/\D/g, '');
+      if (!digits) return '';
+      if (digits.length !== 10) return value.trim();
+      return `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+    }
+
+    /* Escape HTML so typed values are safe to inject into the preview */
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    /* Combine employee name + optional post-nominal letters */
+    function buildName(name, post) {
+      const cleanName = toTitleCase(name);
+      const cleanPost = collapseSpaces(post || '');
+      return cleanPost ? `${cleanName}, ${cleanPost}` : cleanName;
+    }
+
+    /* =========================
+       SIGNATURE RENDERING
+       This is the main renderer that outputs the final
+       HTML for the Compose / Reply signature previews.
+       ========================= */
+    function buildSignatureHtml(type) {
+      // activeConfig includes both the selected group and the selected city/office data.
+      const activeConfig = getSelectedLocationConfig();
+      const name = buildName(employeeName.value, includePostNominal.checked ? postNominal.value : '');
+      const title = toTitleCase(jobTitle.value, JOB_TITLE_CAPITALIZED_TERMS);
+      const mobile = formatPhone(cellPhone.value);
+      const email = buildEmailFromName(employeeName.value, activeConfig.emailDomain);
+      // Keep placeholders visible when no cell number is entered.
+      const cellDisplay = mobile || 'XXX-XXX-XXXX';
+      const escapedCellDisplay = escapeHtml(cellDisplay);
+
+      // ----- CORE default template styles -----
+      const coreBaseLine = "font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: rgb(77, 77, 77); line-height: 1.25; margin: 0;";
+      const coreNameStyle = "font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: rgb(77, 77, 77); line-height: 1.25; margin: 0 0 2px 0;";
+      const coreTitleStyle = "font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: rgb(77, 77, 77); line-height: 1.25; margin: 0;";
+      const coreCompanyStyle = "font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: rgb(77, 77, 77); line-height: 1.25; margin: 0 0 2px 0;";
+      const coreContainerStyle = "font-family: 'Segoe UI', Arial, sans-serif; color: rgb(77, 77, 77); line-height: 1.25;";
+      const coreSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
+
+      // ----- Glenn Allen template styles -----
+      const gaGrey = "rgb(65, 64, 66)";
+      const gaRed = "rgb(186, 32, 37)";
+      const gaBaseLine = `font-family: Helvetica, Arial, sans-serif; font-size: 9pt; color: ${gaGrey}; line-height: 1.2; margin: 0;`;
+      const gaNameStyle = `font-family: Helvetica, Arial, sans-serif; font-size: 9pt; font-weight: 700; color: ${gaGrey}; line-height: 1.2; margin: 0;`;
+      const gaTitleStyle = `font-family: Helvetica, Arial, sans-serif; font-size: 9pt; color: ${gaGrey}; line-height: 1.2; margin: 0;`;
+      const gaCompanyStyle = `font-family: Helvetica, Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${gaRed}; line-height: 1.2; margin: 0;`;
+      const gaSubStyle = `font-family: Helvetica, Arial, sans-serif; font-size: 9pt; font-weight: 700; color: ${gaGrey}; line-height: 1.2; margin: 0;`;
+      const gaSpacerLine = `<div style="font-family: Helvetica, Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
+      const gaDisclaimerText = 'This transmission is intended only for the use of the addressee and may contain information that is confidential.&nbsp; If you are not the intended recipient, be aware that any disclosure, copying, distribution, or use of the contents of this transmission is strictly prohibited.&nbsp;';
+
+      // ----- CCG template styles -----
+      const ccgGrey = "rgb(77, 77, 77)";
+      const ccgSoftGrey = "rgb(189, 190, 192)";
+      const ccgBaseLine = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${ccgGrey}; line-height: 1.25; margin: 0;`;
+      const ccgNameStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${ccgGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
+      const ccgTitleStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${ccgGrey}; line-height: 1.25; margin: 0;`;
+      const ccgCompanyStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${ccgGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
+      const ccgSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
+
+      // ----- The CORE Group template styles -----
+      const theCoreGroupGrey = "rgb(77, 77, 77)";
+      const theCoreGroupSoftGrey = "rgb(189, 190, 192)";
+      const theCoreGroupBaseLine = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${theCoreGroupGrey}; line-height: 1.25; margin: 0;`;
+      const theCoreGroupNameStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${theCoreGroupGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
+      const theCoreGroupTitleStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${theCoreGroupGrey}; line-height: 1.25; margin: 0;`;
+      const theCoreGroupCompanyStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${theCoreGroupGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
+      const theCoreGroupSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
+
+      // ----- CDS template styles -----
+      const cdsGrey = "rgb(77, 77, 77)";
+      const cdsSoftGrey = "rgb(189, 190, 192)";
+      const cdsBaseLine = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${cdsGrey}; line-height: 1.25; margin: 0;`;
+      const cdsNameStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${cdsGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
+      const cdsTitleStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${cdsGrey}; line-height: 1.25; margin: 0;`;
+      const cdsCompanyStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${cdsGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
+      const cdsSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
+
+      // ----- PROCEDEO template styles -----
+      const procedeoGrey = "rgb(101, 102, 101)";
+      const procedeoNameStyle = `font-family: Calibri, Arial, sans-serif; font-size: 12pt; font-weight: 700; color: ${procedeoGrey}; line-height: 1.15; margin: 0;`;
+      const procedeoTitleStyle = `font-family: Calibri, Arial, sans-serif; font-size: 12pt; color: ${procedeoGrey}; line-height: 1.15; margin: 0;`;
+      const procedeoBaseLine = `font-family: Calibri, Arial, sans-serif; font-size: 9pt; color: ${procedeoGrey}; line-height: 1.0; margin: 0;`;
+      const procedeoSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; line-height: 1.0; margin: 0;">&nbsp;</div>`;
+      const procedeoLogo = `<img src="${activeConfig.logoDataUri}" alt="PROCEDEO logo" style="width: 128px; height: 21.75px; display: block;" />`;
+
+      // PROCEDEO template branch
+      if (activeConfig.templateType === 'procedeo') {
+        // PROCEDEO is intentionally kept close to the accepted v38/v43 layout.
+        const composeLine = `C: ${escapedCellDisplay} | www.procedeogroup.com`;
+
+        return `
+          <div style="font-family: Calibri, Arial, sans-serif; color: ${procedeoGrey}; line-height: 1.0;">
+            <div style="${procedeoNameStyle}">${escapeHtml(name)}</div>
+            <div style="${procedeoTitleStyle}">${escapeHtml(title)}</div>
+            ${procedeoSpacerLine}
+            <div style="margin: 0;">${procedeoLogo}</div>
+            ${procedeoSpacerLine}
+            <div style="${procedeoBaseLine}">${composeLine}</div>
+          </div>
+        `.trim();
+      }
+
+      // CCG template branch
+      if (activeConfig.templateType === 'ccg') {
+        return `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; color: ${ccgGrey}; line-height: 1.25;">
+            <div style="${ccgNameStyle}">${escapeHtml(name)}</div>
+            <div style="${ccgTitleStyle}">${escapeHtml(title)}</div>
+            ${ccgSpacerLine}
+            <div style="${ccgCompanyStyle}">CCG Services, Inc.</div>
+            ${type === 'new' ? `<div style="${ccgBaseLine}">Street Address | City, State Zip</div>` : ''}
+            <div style="${ccgBaseLine}">${type === 'new' ? `P: XXX-XXX-XXXX | C: ${escapedCellDisplay}` : `C: ${escapedCellDisplay}`}</div>
+            ${type === 'new' ? `<div style="${ccgBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${ccgGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
+          </div>
+        `.trim();
+      }
+
+      // The CORE Group template branch
+      if (activeConfig.templateType === 'theCoreGroup') {
+        return `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; color: ${theCoreGroupGrey}; line-height: 1.25;">
+            <div style="${theCoreGroupNameStyle}">${escapeHtml(name)}</div>
+            <div style="${theCoreGroupTitleStyle}">${escapeHtml(title)}</div>
+            ${theCoreGroupSpacerLine}
+            <div style="${theCoreGroupCompanyStyle}">The CORE Group</div>
+            ${type === 'new' ? `<div style="${theCoreGroupBaseLine}">Street Address | City, State Zip</div>` : ''}
+            <div style="${theCoreGroupBaseLine}">${type === 'new' ? `P: XXX-XXX-XXXX | C: ${escapedCellDisplay}` : `C: ${escapedCellDisplay}`}</div>
+            ${type === 'new' ? `<div style="${theCoreGroupBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${theCoreGroupGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
+          </div>
+        `.trim();
+      }
+
+      // Glenn Allen template branch
+      if (activeConfig.templateType === 'glennAllen') {
+        return `
+          <div style="font-family: Helvetica, Arial, sans-serif; color: ${gaGrey}; line-height: 1.2;">
+            <div style="${gaNameStyle}">${escapeHtml(name)}</div>
+            <div style="${gaTitleStyle}">${escapeHtml(title)}</div>
+            ${gaSpacerLine}
+            <div style="${gaCompanyStyle}">GLENN ALLEN</div>
+            <div style="${gaSubStyle}">Insurance and Surety Brokers</div>
+            ${type === 'new' ? `<div style="${gaBaseLine}">10625 N. County Rd. | Frisco, TX 75033</div>` : ''}
+            <div style="${gaBaseLine}">${type === 'new' ? `T: 309-284-8676 | F: 309-263-8004 | C: ${escapedCellDisplay}` : `T: XXX-XXX-XXXX | C: ${escapedCellDisplay}`}</div>
+            ${type === 'new' ? `<div style="${gaBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${gaGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
+            ${type === 'new' ? `${gaSpacerLine}<div style="${gaBaseLine}">${gaDisclaimerText}</div>` : ''}
+          </div>
+        `.trim();
+      }
+
+      // CDS template branch
+      if (activeConfig.templateType === 'cds') {
+        return `
+          <div style="font-family: 'Segoe UI', Arial, sans-serif; color: ${cdsGrey}; line-height: 1.25;">
+            <div style="${cdsNameStyle}">${escapeHtml(name)}</div>
+            <div style="${cdsTitleStyle}">${escapeHtml(title)}</div>
+            ${cdsSpacerLine}
+            <div style="${cdsCompanyStyle}"><span style="color: rgb(0, 131, 72);">CORE</span> Disaster Services</div>
+            ${type === 'new' ? `<div style="${cdsBaseLine}">8550 United Plaza, Suite 620 | Baton Rouge, LA 70809</div>` : ''}
+            <div style="${cdsBaseLine}">${type === 'new' ? `P: 225-831-6350 | F: 225-831-6351 | C: ${escapedCellDisplay}` : `C: ${escapedCellDisplay} | W: COREconstruction.com`}</div>
+            ${type === 'new' ? `<div style="${cdsBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${cdsGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
+            ${type === 'new' ? `<div style="${cdsBaseLine}">W: COREconstruction.com</div>` : ''}
+          </div>
+        `.trim();
+      }
+
+      const officePhone = activeConfig.phone || activeConfig.fixedPhone || 'XXX-XXX-XXXX';
+      // CORE default contact lines differ between compose and reply signatures.
+      const contactLine = type === 'new'
+        ? `${activeConfig.officePhoneLabel || 'P'}: ${officePhone} | C: ${cellDisplay} | W: ${activeConfig.website}`
+        : `C: ${cellDisplay} | W: ${activeConfig.website}`;
+      const emailLine = `<div style="${coreBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: rgb(77, 77, 77); text-decoration: none;">${escapeHtml(email)}</a></div>`;
+
+      return `
+        <div style="${coreContainerStyle}">
+          <div style="${coreNameStyle}">${escapeHtml(name)}</div>
+          <div style="${coreTitleStyle}">${escapeHtml(title)}</div>
+          ${coreSpacerLine}
+          <div style="${coreCompanyStyle}">${activeConfig.companyHtml}</div>
+          <div style="${coreBaseLine}">${escapeHtml(contactLine)}</div>
+          ${type === 'new' ? emailLine : ''}
+        </div>
+      `.trim();
+    }
+
+    /*
+      Keep all pending-field pulse animations in the same phase. Without this,
+      fields can drift out of sync when classes are added at different times.
+    */
+    function syncPendingPulsePhase() {
+      const now = (window.performance && window.performance.now) ? window.performance.now() : Date.now();
+      const delay = -(now % PENDING_PULSE_DURATION_MS);
+      [employeeName, jobTitle, state, city].forEach(field => {
+        field.style.setProperty('--pending-animation-delay', `${delay}ms`);
+      });
+    }
+
+    /* Highlight required fields that still need input */
+    function updatePendingStates() {
+      [employeeName, jobTitle, state, city].forEach(field => {
+        field.classList.remove('pending');
+        field.classList.remove('invalid');
+      });
+
+      if (!collapseSpaces(employeeName.value)) employeeName.classList.add('pending');
+      if (!collapseSpaces(jobTitle.value)) jobTitle.classList.add('pending');
+      if (!collapseSpaces(state.value)) state.classList.add('pending');
+
+      const config = getSelectedConfig();
+      if (config && config.cityOptions && config.cityOptions.length && !config.defaultCity && !collapseSpaces(city.value)) {
+        city.classList.add('pending');
+      }
+
+      syncPendingPulsePhase();
+    }
+
+    /* Remove error highlighting from form fields */
+    function clearInvalidStates() {
+      [employeeName, jobTitle, state, city].forEach(field => field.classList.remove('invalid'));
+    }
+
+    /* Apply error highlighting to a specific field */
+    function markInvalid(field) {
+      field.classList.remove('pending');
+      field.classList.add('invalid');
+    }
+
+    /* Show success / error / neutral status messages */
+    function setStatus(el, text, type) {
+      if (el === pasteStatus) {
+        if (!text) {
+          el.textContent = '';
+          el.classList.remove('status-success', 'status-error', 'status-neutral');
+          return;
+        }
+        el.innerHTML = text;
+        el.classList.remove('status-success', 'status-error', 'status-neutral');
+        el.classList.add(type === 'neutral' ? 'status-neutral' : (type === 'error' ? 'status-error' : 'status-success'));
+        return;
+      } else {
+        el.textContent = text || '';
+        el.classList.remove('status-success', 'status-error', 'status-neutral');
+        if (!text) return;
+      }
+      el.classList.add(type === 'error' ? 'status-error' : 'status-success');
+    }
+
+    /* Only keep one copy-status message visible at a time */
+    function clearCopyStatuses() {
+      setStatus(newStatus, '', 'success');
+      setStatus(replyStatus, '', 'success');
+    }
+
+    /* Green highlight on copy buttons after signatures are generated */
+    function setCopyReadyState(isReady) {
+      [copyNewBtn, copyReplyBtn].forEach(btn => {
+        btn.classList.toggle('copy-ready', !!isReady);
+      });
+    }
+
+    /* Blue highlight on download button after signatures are generated */
+    function setDownloadReadyState(isReady) {
+      downloadDocBtn.classList.toggle('download-ready', !!isReady);
+    }
+
+    /* Build a safe file name for Word download */
+    function sanitizeFileName(value) {
+      const clean = collapseSpaces(value || '')
+        .replace(/[^A-Za-z0-9\s_-]/g, '')
+        .trim()
+        .replace(/\s+/g, '_');
+      return clean || 'CORE_Signatures';
+    }
+
+    /* Build the downloadable Word-compatible HTML document */
+    function buildWordDocumentHtml() {
+      const newSig = buildSignatureHtml('new');
+      const replySig = buildSignatureHtml('reply');
+
+      return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CORE Signatures</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #111; margin: 28px;">
+  <div style="font-size: 14pt; font-weight: 700; margin: 0 0 14px 0;">Composing a new message</div>
+  <div>${newSig}</div>
+  <p style="margin: 0; line-height: 1.25;">&nbsp;</p>
+  <p style="margin: 0; line-height: 1.25;">&nbsp;</p>
+  <p style="margin: 0; line-height: 1.25;">&nbsp;</p>
+
+  <div style="font-size: 14pt; font-weight: 700; margin: 0 0 14px 0;">Replying to a message</div>
+  <div>${replySig}</div>
+  <p style="margin: 0; line-height: 1.25;">&nbsp;</p>
+  <p style="margin: 0; line-height: 1.25;">&nbsp;</p>
+</body>
+</html>`;
+    }
+
+    /* Trigger the Word-compatible .doc download */
+    function downloadWordDocument() {
+      const error = validate();
+      if (error) {
+        setStatus(formStatus, error, 'error');
+        setStatus(downloadDocStatus, '', 'success');
+        return;
+      }
+
+      generate();
+
+      const content = buildWordDocumentHtml();
+      const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${sanitizeFileName(employeeName.value)}_CORE_Signatures.doc`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      setStatus(downloadDocStatus, 'Downloaded Word document.', 'success');
+    }
+
+    /* Validate required inputs before generate / download */
+    function validate() {
+      clearInvalidStates();
+
+      if (!collapseSpaces(employeeName.value)) {
+        markInvalid(employeeName);
+        return 'Enter the employee name.';
+      }
+      if (!collapseSpaces(jobTitle.value)) {
+        markInvalid(jobTitle);
+        return 'Enter the job title.';
+      }
+      if (!collapseSpaces(state.value)) {
+        markInvalid(state);
+        return 'Select the state/group.';
+      }
+
+      const config = getSelectedConfig();
+      if (config && config.cityOptions && config.cityOptions.length && !config.defaultCity && !collapseSpaces(city.value)) {
+        markInvalid(city);
+        return `Select the ${config.cityLabel ? config.cityLabel.toLowerCase() : 'city'}.`;
+      }
+
+      return '';
+    }
+
+    /* Generate both on-page signatures and update UI status/highlights */
+    function generate() {
+      const error = validate();
+      if (error) {
+        setStatus(formStatus, error, 'error');
+        return;
+      }
+      setStatus(formStatus, 'Signatures generated.', 'success');
+      newPreview.innerHTML = buildSignatureHtml('new');
+      replyPreview.innerHTML = buildSignatureHtml('reply');
+      clearCopyStatuses();
+      setStatus(pasteStatus, 'NOTE: After copying, paste using <u>Keep Source Formatting</u> (if applicable).', 'neutral');
+      validationNote.style.display = 'block';
+      setCopyReadyState(true);
+      setDownloadReadyState(true);
+    }
+
+    /* Populate a safe test profile for IT/admin spot checks */
+    function loadSampleEmployee() {
+      employeeName.value = 'Joshua Smith';
+      includePostNominal.checked = false;
+      postNominal.value = '';
+      postNominal.disabled = true;
+      jobTitle.value = 'Project Accountant';
+      state.value = 'Arizona';
+      syncDependentFields();
+      city.value = 'Scottsdale, AZ';
+      cellPhone.value = '602-123-4567';
+      clearInvalidStates();
+      updatePendingStates();
+      generate();
+    }
+
+    async function copySignature(which) {
+      const target = which === 'new' ? newPreview : replyPreview;
+      const status = which === 'new' ? newStatus : replyStatus;
+      if (!target.innerHTML.trim()) {
+        clearCopyStatuses();
+        setStatus(status, 'Generate the signature first.', 'error');
+        return;
+      }
+
+      try {
+        const htmlContent = target.innerHTML;
+        const text = target.innerText;
+
+        // Prefer rich HTML clipboard copy so Outlook keeps font/spacing when pasted.
+        if (navigator.clipboard && window.ClipboardItem) {
+          const item = new ClipboardItem({
+            'text/html': new Blob([htmlContent], { type: 'text/html' }),
+            'text/plain': new Blob([text], { type: 'text/plain' })
+          });
+          await navigator.clipboard.write([item]);
+          clearCopyStatuses();
+          setStatus(status, 'Copied.', 'success');
+          return;
+        }
+
+        throw new Error('Rich clipboard API unavailable');
+      } catch (err) {
+        clearCopyStatuses();
+        setStatus(status, 'Browser limited rich copy. Select the signature and use Copy, then paste with Keep Source Formatting.', 'error');
+      }
+    }
+
+    /* =========================
+       EVENT LISTENERS
+       ========================= */
+    [employeeName, jobTitle].forEach(field => {
+      field.addEventListener('input', () => {
+        if (collapseSpaces(field.value)) field.classList.remove('invalid');
+        updatePendingStates();
+      });
+    });
+
+    city.addEventListener('change', () => {
+      if (collapseSpaces(city.value)) city.classList.remove('invalid');
+      updatePendingStates();
+    });
+
+    state.addEventListener('change', () => {
+      if (collapseSpaces(state.value)) state.classList.remove('invalid');
+      syncDependentFields();
+      updatePendingStates();
+    });
+
+    /* =========================
+       INITIAL PAGE SETUP
+       ========================= */
+    populateStateOptions();
+    syncDependentFields();
+    updatePendingStates();
+    setCopyReadyState(false);
+    setDownloadReadyState(false);
+
+    /* Button click handlers */
+    document.getElementById('generateBtn').addEventListener('click', generate);
+    document.getElementById('copyNewBtn').addEventListener('click', () => copySignature('new'));
+    document.getElementById('copyReplyBtn').addEventListener('click', () => copySignature('reply'));
+    document.getElementById('downloadDocBtn').addEventListener('click', downloadWordDocument);
+    sampleBtn.addEventListener('click', loadSampleEmployee);
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      // Restore the form and preview area to the initial page-load state.
+      employeeName.value = '';
+      clearInvalidStates();
+      includePostNominal.checked = false;
+      postNominal.value = '';
+      postNominal.disabled = true;
+      jobTitle.value = '';
+      state.value = '';
+      populateStateOptions();
+      syncDependentFields();
+      cellPhone.value = '';
+      newPreview.innerHTML = '';
+      replyPreview.innerHTML = '';
+      setStatus(formStatus, '', 'success');
+      clearCopyStatuses();
+      setStatus(pasteStatus, '', 'success');
+      setStatus(downloadDocStatus, '', 'success');
+      validationNote.style.display = 'none';
+      setCopyReadyState(false);
+      setDownloadReadyState(false);
+      updatePendingStates();
+    });
+
+  </script>
+</body>
+</html>
