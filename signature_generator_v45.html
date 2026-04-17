@@ -36,8 +36,8 @@
     }
     .brand-header {
       display: flex;
-      align-items: center;
-      gap: 14px;
+      align-items: flex-start;
+      gap: 16px;
       margin-bottom: 8px;
     }
     .brand-logo {
@@ -50,6 +50,7 @@
       flex: 0 0 auto;
     }
     .brand-text {
+      flex: 1 1 auto;
       min-width: 0;
     }
     .title-row {
@@ -95,67 +96,85 @@
       box-shadow: 0 4px 14px rgba(0,0,0,0.04);
     }
     .template-toggle-wrap {
-      text-align: left;
+      align-self: flex-start;
       flex: 0 0 auto;
+      margin-left: auto;
+      padding: 10px;
+      border: 1px solid rgba(0, 131, 72, 0.16);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.84) 0%, rgba(235,248,243,0.82) 100%);
+      box-shadow: 0 8px 20px rgba(0, 75, 46, 0.08), inset 0 1px 0 rgba(255,255,255,0.75);
+      text-align: left;
+    }
+    .template-toggle-copy {
+      color: #5b6870;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.25;
+      margin-top: 6px;
+      max-width: 220px;
+      white-space: normal;
     }
     .template-toggle-label {
       display: block;
-      color: #555;
-      font-size: 11px;
+      color: #243934;
+      font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0;
+      letter-spacing: 0.06em;
       line-height: 1.2;
-      margin: 0 0 6px;
+      margin: 0 0 7px;
+      text-transform: uppercase;
     }
     .template-toggle {
       position: relative;
       display: inline-grid;
       grid-template-columns: 1fr 1fr;
-      width: 164px;
-      min-height: 34px;
-      padding: 3px;
-      border: 1px solid #b8bec5;
-      border-radius: 8px;
-      background: linear-gradient(180deg, #f7f8f9 0%, #dadde0 100%);
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.85), 0 1px 2px rgba(0,0,0,0.08);
+      width: 220px;
+      min-height: 40px;
+      padding: 4px;
+      border: 1px solid rgba(31, 64, 56, 0.20);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #eef3f1 0%, #dbe5e2 100%);
+      box-shadow: inset 0 2px 4px rgba(24, 49, 43, 0.14), 0 1px 0 rgba(255,255,255,0.85);
       isolation: isolate;
     }
     .template-toggle::before {
       content: "";
       position: absolute;
-      top: 3px;
-      left: 3px;
-      width: calc(50% - 3px);
-      height: calc(100% - 6px);
-      border: 1px solid rgba(0,0,0,0.14);
-      border-radius: 6px;
-      background: linear-gradient(180deg, #ffffff 0%, #dfe3e7 100%);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.12);
-      transition: transform 0.2s ease, background-color 0.2s ease;
+      top: 4px;
+      left: 4px;
+      width: calc(50% - 4px);
+      height: calc(100% - 8px);
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #ffffff 0%, #dff5ec 100%);
+      box-shadow: 0 5px 14px rgba(0, 131, 72, 0.20), inset 0 0 0 1px rgba(255,255,255,0.85), inset 0 -1px 0 rgba(0, 131, 72, 0.08);
+      transition: transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
       z-index: -1;
     }
     .template-toggle.is-future::before {
       transform: translateX(100%);
-      background: linear-gradient(180deg, #d8f0ea 0%, #b8ddd4 100%);
+      background: linear-gradient(180deg, #c7f4e2 0%, #49c890 100%);
+      box-shadow: 0 6px 16px rgba(0, 131, 72, 0.28), inset 0 0 0 1px rgba(255,255,255,0.42), inset 0 -1px 0 rgba(0, 86, 48, 0.16);
     }
     .template-toggle-option {
       position: relative;
       border: 0;
-      border-radius: 6px;
-      padding: 6px 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
       background: transparent;
-      color: #777;
-      font-size: 12px;
+      color: #66736f;
+      font-size: 13px;
       font-weight: 700;
       line-height: 1.1;
       text-align: center;
-      transition: color 0.2s ease, text-shadow 0.2s ease;
+      transition: color 0.2s ease, text-shadow 0.2s ease, transform 0.2s ease;
     }
     .template-toggle-option:hover {
-      transform: none;
+      transform: translateY(-1px);
     }
     .template-toggle-option[aria-pressed="true"] {
-      color: #2f5f54;
+      color: #0f3f32;
       text-shadow: 0 1px 0 rgba(255,255,255,0.72);
     }
     label {
@@ -271,6 +290,89 @@
       line-height: 1.35;
       margin-top: 8px;
     }
+    .template-warning-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(15, 42, 36, 0.34);
+      backdrop-filter: blur(3px);
+    }
+    .template-warning-overlay[hidden] {
+      display: none;
+    }
+    .template-warning-dialog {
+      width: min(430px, 100%);
+      border: 1px solid rgba(0, 131, 72, 0.22);
+      border-radius: 18px;
+      background: linear-gradient(180deg, #ffffff 0%, #eefaf5 100%);
+      box-shadow: 0 22px 50px rgba(14, 48, 39, 0.24), inset 0 1px 0 rgba(255,255,255,0.88);
+      padding: 22px;
+      color: #1c2f2a;
+    }
+    .template-warning-kicker {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(0, 131, 72, 0.10);
+      color: var(--core-green);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .template-warning-title {
+      margin: 0 0 8px;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+    .template-warning-heading {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .template-warning-heading .template-warning-title {
+      flex: 1 1 auto;
+    }
+    .template-warning-icon {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #fff3f1 0%, #ffd9d4 100%);
+      color: #c92a20;
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1;
+      box-shadow: inset 0 0 0 1px rgba(201, 42, 32, 0.16);
+    }
+    .template-warning-text {
+      margin: 0 0 18px;
+      color: #4b5c57;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .template-warning-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .template-warning-ok {
+      min-width: 92px;
+      background: var(--core-green);
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(0, 131, 72, 0.20);
+    }
+    .template-warning-ok:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 22px rgba(0, 131, 72, 0.26);
+    }
     .primary {
       background: var(--core-green);
       color: white;
@@ -382,14 +484,24 @@
     .sig-preview .company { margin-bottom: 2px; }
     @media (max-width: 900px) {
       .grid { grid-template-columns: 1fr; }
+      .brand-header {
+        flex-wrap: wrap;
+      }
+      .template-toggle-wrap {
+        margin-left: 124px;
+      }
     }
     @media (max-width: 460px) {
       .title-row {
         display: block;
       }
-      .title-row .template-toggle-wrap {
-        margin-top: 10px;
-        text-align: left;
+      .brand-header {
+        display: block;
+      }
+      .template-toggle-wrap {
+        display: inline-block;
+        margin-top: 14px;
+        margin-left: 0;
       }
     }
   </style>
@@ -405,18 +517,35 @@
      <div class="brand-text">
        <div class="title-row">
          <h1>CORE Signature Generator</h1>
-         <div class="template-toggle-wrap">
-           <span class="template-toggle-label" id="templateModeLabel">Template set</span>
-           <div class="template-toggle" id="templateModeToggle" role="group" aria-labelledby="templateModeLabel">
-             <button class="template-toggle-option" id="currentTemplateBtn" type="button" aria-pressed="true">Today</button>
-             <button class="template-toggle-option" id="futureTemplateBtn" type="button" aria-pressed="false">Future</button>
-           </div>
-         </div>
-       </div>
-       <div class="sub">Enter the employee info, then copy the finished signature for new messages and replies.</div>
-       <div class="sub-note">* Employee name and Job title are automatically correctly capitalized.</div>
-     </div>
-   </div>
+        </div>
+        <div class="sub">Enter the employee info, then copy the finished signature for new messages and replies.</div>
+        <div class="sub-note">* Employee name and Job title are automatically correctly capitalized.</div>
+      </div>
+      <div class="template-toggle-wrap">
+        <span class="template-toggle-label" id="templateModeLabel">Template set</span>
+        <div class="template-toggle" id="templateModeToggle" role="group" aria-labelledby="templateModeLabel">
+          <button class="template-toggle-option" id="currentTemplateBtn" type="button" aria-pressed="true">Today</button>
+          <button class="template-toggle-option" id="futureTemplateBtn" type="button" aria-pressed="false">Future</button>
+        </div>
+        <div class="template-toggle-copy">Choose live templates or the future test set.</div>
+      </div>
+    </div>
+
+    <div class="template-warning-overlay" id="futureTemplateWarning" role="dialog" aria-modal="true" aria-labelledby="futureTemplateWarningTitle" hidden>
+      <div class="template-warning-dialog">
+        <div class="template-warning-kicker">Future preview</div>
+        <div class="template-warning-heading">
+          <h2 class="template-warning-title" id="futureTemplateWarningTitle">Future templates are still in testing</h2>
+          <span class="template-warning-icon" aria-hidden="true">!</span>
+        </div>
+        <p class="template-warning-text">
+          These template designs are for developer review only and are not implemented for general use yet. Use Today for current production signatures.
+        </p>
+        <div class="template-warning-actions">
+          <button class="template-warning-ok" id="futureTemplateWarningOk" type="button">OK</button>
+        </div>
+      </div>
+    </div>
 
     <div class="grid">
       <!-- =========================
@@ -640,20 +769,23 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       TheCOREGroup: {
         label: 'The CORE Group',
         templateType: 'theCoreGroup',
-        emailDomain: 'coreltd.com'
+        emailDomain: 'coreltd.com',
+        hasFutureTemplate: true
       },
       // External managed company - PROCEDEO
       PROCEDEO: {
         label: 'PROCEDEO',
         templateType: 'procedeo',
         emailDomain: 'procedeogroup.com',
-        logoDataUri: PROCEDEO_LOGO
+        logoDataUri: PROCEDEO_LOGO,
+        hasFutureTemplate: true
       },
       // CORE affiliated group - CCG / Core Construction Services
       CCG: {
         label: 'CCG',
         templateType: 'ccg',
-        emailDomain: 'ccg-services.com'
+        emailDomain: 'ccg-services.com',
+        hasFutureTemplate: true
       },
       // External managed company - Glenn Allen
       GlennAllen: {
@@ -683,6 +815,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         options: ['PROCEDEO', 'GlennAllen']
       }
     ];
+    let currentTemplateMode = 'current';
 
     /* =========================
        DOM REFERENCES
@@ -710,7 +843,10 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     const templateModeToggle = document.getElementById('templateModeToggle');
     const currentTemplateBtn = document.getElementById('currentTemplateBtn');
     const futureTemplateBtn = document.getElementById('futureTemplateBtn');
+    const futureTemplateWarning = document.getElementById('futureTemplateWarning');
+    const futureTemplateWarningOk = document.getElementById('futureTemplateWarningOk');
     const PENDING_PULSE_DURATION_MS = 2600;
+    let hasShownFutureTemplateWarning = false;
 
     /* Basic text cleanup helpers */
     function collapseSpaces(value) {
@@ -719,6 +855,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
 
     /* Build the State/Group dropdown options */
     function populateStateOptions() {
+      const previousValue = state.value;
       state.innerHTML = '<option value="" selected disabled hidden>Select</option>';
 
       stateOptionGroups.forEach(group => {
@@ -726,14 +863,19 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         optgroup.label = group.label;
 
         group.options.forEach(key => {
+          const config = stateConfigs[key];
           const option = document.createElement('option');
           option.value = key;
-          option.textContent = stateConfigs[key].label;
+          option.textContent = `${config.label}${currentTemplateMode === 'future' && config.hasFutureTemplate ? ' (future)' : ''}`;
           optgroup.appendChild(option);
         });
 
         state.appendChild(optgroup);
       });
+
+      if (previousValue && stateConfigs[previousValue]) {
+        state.value = previousValue;
+      }
     }
 
     /* Reset the City dropdown with a placeholder option */
@@ -920,6 +1062,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       // Keep placeholders visible when no cell number is entered.
       const cellDisplay = mobile || 'XXX-XXX-XXXX';
       const escapedCellDisplay = escapeHtml(cellDisplay);
+      const isFutureTemplateMode = currentTemplateMode === 'future';
 
       // ----- CORE default template styles -----
       const coreBaseLine = "font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: rgb(77, 77, 77); line-height: 1.25; margin: 0;";
@@ -947,6 +1090,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const ccgTitleStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${ccgGrey}; line-height: 1.25; margin: 0;`;
       const ccgCompanyStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${ccgGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
       const ccgSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
+      const ccgTodaySpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.25; margin: 0;">&nbsp;</div>`;
 
       // ----- The CORE Group template styles -----
       const theCoreGroupGrey = "rgb(77, 77, 77)";
@@ -956,6 +1100,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const theCoreGroupTitleStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${theCoreGroupGrey}; line-height: 1.25; margin: 0;`;
       const theCoreGroupCompanyStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${theCoreGroupGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
       const theCoreGroupSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
+      const theCoreGroupTodaySpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.25; margin: 0;">&nbsp;</div>`;
 
       // ----- PROCEDEO template styles -----
       const procedeoGrey = "rgb(101, 102, 101)";
@@ -964,11 +1109,36 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const procedeoBaseLine = `font-family: Calibri, Arial, sans-serif; font-size: 9pt; color: ${procedeoGrey}; line-height: 1.0; margin: 0;`;
       const procedeoSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; line-height: 1.0; margin: 0;">&nbsp;</div>`;
       const procedeoLogo = `<img src="${activeConfig.logoDataUri}" alt="PROCEDEO logo" style="width: 128px; height: 21.75px; display: block;" />`;
+      const procedeoTodayGrey = "rgb(119, 119, 119)";
+      const procedeoOfficePhone = "817-764-0012";
+      const procedeoTodayNameStyle = "font-family: Calibri, Arial, sans-serif; font-size: 11pt; font-weight: 700; color: rgb(101, 101, 101); line-height: 1.15; margin: 0;";
+      const procedeoTodayTitleStyle = "font-family: Calibri, Arial, sans-serif; font-size: 9pt; color: rgb(100, 100, 100); line-height: 1.15; margin: 0;";
+      const procedeoTodayBaseLine = `font-family: Calibri, Arial, sans-serif; font-size: 9pt; color: ${procedeoTodayGrey}; line-height: 1.15; margin: 0;`;
+      const procedeoTodaySpacerLine = `<div style="font-family: Calibri, Arial, sans-serif; font-size: 9pt; line-height: 1.15; margin: 0;">&nbsp;</div>`;
+      const procedeoTodayLogo = `<div style="font-family: 'Arial Black', Arial, sans-serif; font-size: 14pt; font-weight: 700; line-height: 1.15; margin: 0;"><span style="color: ${procedeoTodayGrey};">PR</span><span style="color: rgb(253, 206, 7);">O</span><span style="color: ${procedeoTodayGrey};">CEDEO</span></div>`;
+      const theCoreGroupOfficePhone = "972-214-2700";
 
       // PROCEDEO template branch
       if (activeConfig.templateType === 'procedeo') {
-        // PROCEDEO is intentionally kept close to the accepted v38/v43 layout.
-        const composeLine = `C: ${escapedCellDisplay} | www.procedeogroup.com`;
+        if (!isFutureTemplateMode) {
+          return `
+              <div style="font-family: Calibri, Arial, sans-serif; color: ${procedeoTodayGrey}; line-height: 1.15;">
+                <div style="${procedeoTodayNameStyle}">${escapeHtml(name)}</div>
+                <div style="${procedeoTodayTitleStyle}">${escapeHtml(title)}</div>
+                ${procedeoTodaySpacerLine}
+                ${procedeoTodayLogo}
+                <div style="${procedeoTodayBaseLine}">${type === 'new'
+                ? `<span style="font-weight: 700;">T</span>: ${procedeoOfficePhone} | <span style="font-weight: 700;">C:</span> ${escapedCellDisplay}`
+                : `<span style="font-weight: 700;">C:</span> ${escapedCellDisplay} | www.procedeogroup.com`}</div>
+              ${type === 'new' ? `<div style="${procedeoTodayBaseLine}"><span style="font-weight: 700;">E: </span><a href="mailto:${escapeHtml(email)}" style="color: ${procedeoTodayGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
+            </div>
+          `.trim();
+        }
+
+        // Future PROCEDEO is intentionally kept close to the accepted v38/v43 layout.
+        const composeLine = type === 'new'
+          ? `T: ${procedeoOfficePhone} | C: ${escapedCellDisplay} | www.procedeogroup.com`
+          : `C: ${escapedCellDisplay} | www.procedeogroup.com`;
 
         return `
           <div style="font-family: Calibri, Arial, sans-serif; color: ${procedeoGrey}; line-height: 1.0;">
@@ -984,6 +1154,19 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
 
       // CCG template branch
       if (activeConfig.templateType === 'ccg') {
+        if (!isFutureTemplateMode) {
+          return `
+              <div style="font-family: 'Segoe UI', Arial, sans-serif; color: ${ccgGrey}; line-height: 1.25;">
+                <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${ccgGrey}; line-height: 1.25; margin: 0;">${escapeHtml(name)}</div>
+                <div style="${ccgTitleStyle}">${escapeHtml(title)}</div>
+                ${ccgTodaySpacerLine}
+                <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: rgb(24, 75, 103); line-height: 1.25; margin: 0;">CCG Services, Inc.</div>
+              <div style="${ccgBaseLine}">P: XXX-XXX-XXXX | C: ${escapedCellDisplay}</div>
+              ${type === 'new' ? `<div style="${ccgBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${ccgGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
+            </div>
+          `.trim();
+        }
+
         return `
           <div style="font-family: 'Segoe UI', Arial, sans-serif; color: ${ccgGrey}; line-height: 1.25;">
             <div style="${ccgNameStyle}">${escapeHtml(name)}</div>
@@ -999,6 +1182,19 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
 
       // The CORE Group template branch
       if (activeConfig.templateType === 'theCoreGroup') {
+        if (!isFutureTemplateMode) {
+          return `
+              <div style="font-family: 'Segoe UI', Arial, sans-serif; color: ${theCoreGroupGrey}; line-height: 1.25;">
+                <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${theCoreGroupGrey}; line-height: 1.25; margin: 0;">${escapeHtml(name)}</div>
+                <div style="${theCoreGroupTitleStyle}">${escapeHtml(title)}</div>
+                ${theCoreGroupTodaySpacerLine}
+                <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${theCoreGroupGrey}; line-height: 1.25; margin: 0;">The <span style="color: rgb(0, 131, 72);">CORE</span>&nbsp;Group</div>
+              <div style="${theCoreGroupBaseLine}">${type === 'new' ? `T: ${theCoreGroupOfficePhone} | C: ${escapedCellDisplay}` : `C: ${escapedCellDisplay}`}</div>
+              ${type === 'new' ? `<div style="${theCoreGroupBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${theCoreGroupGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
+            </div>
+          `.trim();
+        }
+
         return `
           <div style="font-family: 'Segoe UI', Arial, sans-serif; color: ${theCoreGroupGrey}; line-height: 1.25;">
             <div style="${theCoreGroupNameStyle}">${escapeHtml(name)}</div>
@@ -1006,7 +1202,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
             ${theCoreGroupSpacerLine}
             <div style="${theCoreGroupCompanyStyle}">The CORE Group</div>
             ${type === 'new' ? `<div style="${theCoreGroupBaseLine}">Street Address | City, State Zip</div>` : ''}
-            <div style="${theCoreGroupBaseLine}">${type === 'new' ? `P: XXX-XXX-XXXX | C: ${escapedCellDisplay}` : `C: ${escapedCellDisplay}`}</div>
+            <div style="${theCoreGroupBaseLine}">${type === 'new' ? `P: ${theCoreGroupOfficePhone} | C: ${escapedCellDisplay}` : `C: ${escapedCellDisplay}`}</div>
             ${type === 'new' ? `<div style="${theCoreGroupBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${theCoreGroupGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
           </div>
         `.trim();
@@ -1129,9 +1325,27 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     /* Toggle between current and future template sets; rendering still uses today's templates. */
     function setTemplateMode(mode) {
       const isFuture = mode === 'future';
+      currentTemplateMode = isFuture ? 'future' : 'current';
       templateModeToggle.classList.toggle('is-future', isFuture);
       currentTemplateBtn.setAttribute('aria-pressed', String(!isFuture));
       futureTemplateBtn.setAttribute('aria-pressed', String(isFuture));
+      populateStateOptions();
+      syncDependentFields();
+
+      if (newPreview.innerHTML.trim() || replyPreview.innerHTML.trim()) {
+        generate();
+      }
+
+      if (isFuture && !hasShownFutureTemplateWarning) {
+        hasShownFutureTemplateWarning = true;
+        futureTemplateWarning.hidden = false;
+        futureTemplateWarningOk.focus();
+      }
+    }
+
+    function closeFutureTemplateWarning() {
+      futureTemplateWarning.hidden = true;
+      futureTemplateBtn.focus();
     }
 
     /* Build a safe file name for Word download */
@@ -1334,6 +1548,12 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     sampleBtn.addEventListener('click', loadSampleEmployee);
     currentTemplateBtn.addEventListener('click', () => setTemplateMode('current'));
     futureTemplateBtn.addEventListener('click', () => setTemplateMode('future'));
+    futureTemplateWarningOk.addEventListener('click', closeFutureTemplateWarning);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !futureTemplateWarning.hidden) {
+        closeFutureTemplateWarning();
+      }
+    });
     document.getElementById('clearBtn').addEventListener('click', () => {
       // Restore the form and preview area to the initial page-load state.
       employeeName.value = '';
