@@ -31,8 +31,8 @@
        ========================= */
     .wrap {
       max-width: 1100px;
-      margin: 32px auto;
-      padding: 0 20px;
+      margin: 32px auto 0;
+      padding: 0 20px 120px;
     }
     .brand-header {
       display: flex;
@@ -94,6 +94,10 @@
       border-radius: 14px;
       padding: 18px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+    .card.card-size-animating {
+      overflow: hidden;
+      will-change: height;
     }
     .template-toggle-wrap {
       align-self: flex-start;
@@ -262,6 +266,13 @@
       background: linear-gradient(180deg, #c9f0d7 0%, #08c852 100%);
       box-shadow: 0 0 0 3px rgba(0, 131, 72, 0.30), 0 8px 18px rgba(0, 131, 72, 0.14);
     }
+    .copy-not-ready:hover,
+    .download-not-ready:hover {
+      background: #cbd2d7;
+      color: #66717a;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(82, 92, 101, 0.12), inset 0 0 0 1px rgba(82, 92, 101, 0.10);
+    }
     .copy-ready:hover {
       transform: translateY(-1px);
       box-shadow: 0 0 0 3px rgba(0, 131, 72, 0.5), 0 12px 22px rgba(0, 131, 72, 0.18);
@@ -284,6 +295,9 @@
       color: #6b5a13;
       font-size: 13px;
       line-height: 1.35;
+    }
+    .validation-note.note-pop {
+      animation: statusMessageIn 0.24s ease-out;
     }
     .download-note {
       color: #666;
@@ -382,6 +396,14 @@
       background: #e8ecef;
       color: #111;
     }
+    #copyNewBtn.copy-not-ready,
+    #copyReplyBtn.copy-not-ready,
+    #downloadDocBtn.download-not-ready {
+      background: #d3d9dd;
+      color: #747d85;
+      opacity: 0.76;
+      box-shadow: inset 0 0 0 1px rgba(82, 92, 101, 0.08);
+    }
     #generateBtn:hover {
       transform: translateY(-1px);
       box-shadow: 0 10px 18px rgba(0, 131, 72, 0.20);
@@ -457,9 +479,28 @@
       border: 1px solid rgba(0, 131, 72, 0.18);
       background: linear-gradient(180deg, #eef9f2 0%, #e3f5ea 100%);
     }
-    @keyframes copiedStatusHop {
-      0%, 100% {
+    @keyframes statusMessageIn {
+      0% {
+        opacity: 0;
+        transform: translateY(4px) scale(0.99);
+        filter: blur(2px);
+      }
+      100% {
+        opacity: 1;
         transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+    .status-pop {
+      animation: statusMessageIn 0.24s ease-out;
+    }
+    @keyframes copiedStatusHop {
+      0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.98);
+      }
+      12% {
+        opacity: 1;
       }
       20% {
         transform: translateY(-5px) scale(1.02);
@@ -471,6 +512,10 @@
         transform: translateY(-3px) scale(1.01);
       }
       80% {
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 1;
         transform: translateY(0) scale(1);
       }
     }
@@ -500,6 +545,21 @@
       line-height: 1.25;
       transform-origin: left center;
       transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
+    }
+    @keyframes signaturePreviewIn {
+      0% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.985);
+        filter: blur(2px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+    .sig-preview.is-rendering {
+      animation: signaturePreviewIn 0.34s ease-out;
     }
     .sig-preview.is-clearing {
       opacity: 0;
@@ -892,6 +952,102 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     let hasShownFutureTemplateWarning = false;
     let hasCurrentGeneratedSignatures = false;
     let clearPreviewTimer = null;
+    const animatedCards = Array.from(document.querySelectorAll('.card'));
+    const cardResizeAnimations = new WeakMap();
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let cardResizeBatchDepth = 0;
+    let cardResizeBatchBefore = null;
+
+    /* Smoothly resize cards after content/status changes without fighting inner animations. */
+    function snapshotCardHeights() {
+      return new Map(animatedCards.map(card => [card, card.getBoundingClientRect().height]));
+    }
+
+    function settleCardResizeAnimations() {
+      animatedCards.forEach(card => {
+        const animation = cardResizeAnimations.get(card);
+        if (!animation) return;
+
+        try {
+          animation.finish();
+        } catch (err) {
+          animation.cancel();
+          card.style.height = '';
+          card.classList.remove('card-size-animating');
+          cardResizeAnimations.delete(card);
+        }
+      });
+    }
+
+    function animateCardResizeChanges(beforeHeights) {
+      if (prefersReducedMotion.matches) return;
+
+      animatedCards.forEach(card => {
+        const fromHeight = beforeHeights.get(card);
+        const toHeight = card.getBoundingClientRect().height;
+
+        if (typeof card.animate !== 'function' || !Number.isFinite(fromHeight) || !Number.isFinite(toHeight) || Math.abs(fromHeight - toHeight) < 1.5) {
+          return;
+        }
+
+        const existingAnimation = cardResizeAnimations.get(card);
+        if (existingAnimation) existingAnimation.cancel();
+
+        card.classList.add('card-size-animating');
+        card.style.height = `${fromHeight}px`;
+        void card.offsetHeight;
+
+        const animation = card.animate(
+          [
+            { height: `${fromHeight}px` },
+            { height: `${toHeight}px` }
+          ],
+          {
+            duration: 260,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+          }
+        );
+
+        card.style.height = `${toHeight}px`;
+        cardResizeAnimations.set(card, animation);
+
+        animation.onfinish = () => {
+          if (cardResizeAnimations.get(card) !== animation) return;
+          card.style.height = '';
+          card.classList.remove('card-size-animating');
+          cardResizeAnimations.delete(card);
+        };
+
+        animation.oncancel = () => {
+          if (cardResizeAnimations.get(card) !== animation) return;
+          cardResizeAnimations.delete(card);
+        };
+      });
+    }
+
+    function withCardResizeAnimation(callback) {
+      if (prefersReducedMotion.matches || !animatedCards.length) {
+        return callback();
+      }
+
+      const isOuterBatch = cardResizeBatchDepth === 0;
+      if (isOuterBatch) {
+        settleCardResizeAnimations();
+        cardResizeBatchBefore = snapshotCardHeights();
+      }
+
+      cardResizeBatchDepth += 1;
+      try {
+        return callback();
+      } finally {
+        cardResizeBatchDepth -= 1;
+        if (isOuterBatch) {
+          const beforeHeights = cardResizeBatchBefore;
+          cardResizeBatchBefore = null;
+          requestAnimationFrame(() => animateCardResizeChanges(beforeHeights));
+        }
+      }
+    }
 
     /* Basic text cleanup helpers */
     function collapseSpaces(value) {
@@ -1342,28 +1498,39 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       });
     }
 
+    /* Replay the status entrance animation whenever a new message appears. */
+    function replayStatusAnimation(el) {
+      el.classList.remove('status-pop');
+      void el.offsetWidth;
+      el.classList.add('status-pop');
+    }
+
     /* Show success / error / neutral status messages */
     function setStatus(el, text, type) {
-      if (text && type === 'error') {
-        clearOtherErrorStatuses(el);
-      }
-
-      if (el === pasteStatus) {
-        if (!text) {
-          el.textContent = '';
-          el.classList.remove('status-success', 'status-error', 'status-neutral', 'status-copy-pop');
-          return;
+      return withCardResizeAnimation(() => {
+        if (text && type === 'error') {
+          clearOtherErrorStatuses(el);
         }
-        el.innerHTML = text;
-        el.classList.remove('status-success', 'status-error', 'status-neutral', 'status-copy-pop');
-        el.classList.add(type === 'neutral' ? 'status-neutral' : (type === 'error' ? 'status-error' : 'status-success'));
-        return;
-      } else {
-        el.textContent = text || '';
-        el.classList.remove('status-success', 'status-error', 'status-neutral', 'status-copy-pop');
-        if (!text) return;
-      }
-      el.classList.add(type === 'error' ? 'status-error' : 'status-success');
+
+        if (el === pasteStatus) {
+          if (!text) {
+            el.textContent = '';
+            el.classList.remove('status-success', 'status-error', 'status-neutral', 'status-pop', 'status-copy-pop');
+            return;
+          }
+          el.innerHTML = text;
+          el.classList.remove('status-success', 'status-error', 'status-neutral', 'status-pop', 'status-copy-pop');
+          el.classList.add(type === 'neutral' ? 'status-neutral' : (type === 'error' ? 'status-error' : 'status-success'));
+          replayStatusAnimation(el);
+          return;
+        } else {
+          el.textContent = text || '';
+          el.classList.remove('status-success', 'status-error', 'status-neutral', 'status-pop', 'status-copy-pop');
+          if (!text) return;
+        }
+        el.classList.add(type === 'error' ? 'status-error' : 'status-success');
+        replayStatusAnimation(el);
+      });
     }
 
     /* Give the copy confirmation a small two-hop motion when it appears. */
@@ -1375,21 +1542,23 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     }
 
     /* Only keep one copy-status message visible at a time */
-    function clearCopyStatuses() {
-      setStatus(newStatus, '', 'success');
-      setStatus(replyStatus, '', 'success');
+    function clearCopyStatuses(exceptStatus = null) {
+      if (newStatus !== exceptStatus) setStatus(newStatus, '', 'success');
+      if (replyStatus !== exceptStatus) setStatus(replyStatus, '', 'success');
     }
 
     /* Green highlight on copy buttons after signatures are generated */
     function setCopyReadyState(isReady) {
       [copyNewBtn, copyReplyBtn].forEach(btn => {
         btn.classList.toggle('copy-ready', !!isReady);
+        btn.classList.toggle('copy-not-ready', !isReady);
       });
     }
 
     /* Blue highlight on download button after signatures are generated */
     function setDownloadReadyState(isReady) {
       downloadDocBtn.classList.toggle('download-ready', !!isReady);
+      downloadDocBtn.classList.toggle('download-not-ready', !isReady);
     }
 
     /* Toggle between today's production templates and future preview templates. */
@@ -1513,59 +1682,76 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
 
     /* Clear rendered signatures and immediately block stale copy/download actions. */
     function clearGeneratedPreviews({ animate = false } = {}) {
-      hasCurrentGeneratedSignatures = false;
-      const previewEls = [newPreview, replyPreview];
-      const hasPreviewContent = previewEls.some(preview => preview.innerHTML.trim());
+      return withCardResizeAnimation(() => {
+        hasCurrentGeneratedSignatures = false;
+        const previewEls = [newPreview, replyPreview];
+        const hasPreviewContent = previewEls.some(preview => preview.innerHTML.trim());
 
-      if (clearPreviewTimer) {
-        clearTimeout(clearPreviewTimer);
-        clearPreviewTimer = null;
-      }
-
-      clearCopyStatuses();
-      setStatus(formStatus, '', 'success');
-      setStatus(pasteStatus, '', 'success');
-      setStatus(downloadDocStatus, '', 'success');
-      validationNote.style.display = 'none';
-      setCopyReadyState(false);
-      setDownloadReadyState(false);
-
-      if (animate && hasPreviewContent) {
-        previewEls.forEach(preview => preview.classList.add('is-clearing'));
-        clearPreviewTimer = setTimeout(() => {
-          previewEls.forEach(preview => {
-            preview.innerHTML = '';
-            preview.classList.remove('is-clearing');
-          });
+        if (clearPreviewTimer) {
+          clearTimeout(clearPreviewTimer);
           clearPreviewTimer = null;
-        }, 290);
-        return;
-      }
+        }
 
-      previewEls.forEach(preview => {
-        preview.innerHTML = '';
-        preview.classList.remove('is-clearing');
+        clearCopyStatuses();
+        setStatus(formStatus, '', 'success');
+        setStatus(pasteStatus, '', 'success');
+        setStatus(downloadDocStatus, '', 'success');
+        validationNote.style.display = 'none';
+        validationNote.classList.remove('note-pop');
+        setCopyReadyState(false);
+        setDownloadReadyState(false);
+
+        if (animate && hasPreviewContent) {
+          previewEls.forEach(preview => {
+            preview.classList.remove('is-rendering');
+            preview.classList.add('is-clearing');
+          });
+          clearPreviewTimer = setTimeout(() => {
+            withCardResizeAnimation(() => {
+              previewEls.forEach(preview => {
+                preview.innerHTML = '';
+                preview.classList.remove('is-clearing', 'is-rendering');
+              });
+              clearPreviewTimer = null;
+            });
+          }, 290);
+          return;
+        }
+
+        previewEls.forEach(preview => {
+          preview.innerHTML = '';
+          preview.classList.remove('is-clearing', 'is-rendering');
+        });
       });
     }
 
     /* Render current input values into both previews. */
     function renderGeneratedPreviews({ announce = false } = {}) {
-      if (clearPreviewTimer) {
-        clearTimeout(clearPreviewTimer);
-        clearPreviewTimer = null;
-      }
-      [newPreview, replyPreview].forEach(preview => preview.classList.remove('is-clearing'));
+      return withCardResizeAnimation(() => {
+        if (clearPreviewTimer) {
+          clearTimeout(clearPreviewTimer);
+          clearPreviewTimer = null;
+        }
+        [newPreview, replyPreview].forEach(preview => preview.classList.remove('is-clearing', 'is-rendering'));
 
-      hasCurrentGeneratedSignatures = true;
-      if (announce) setStatus(formStatus, 'Signatures generated.', 'success');
-      newPreview.innerHTML = buildSignatureHtml('new');
-      replyPreview.innerHTML = buildSignatureHtml('reply');
-      clearCopyStatuses();
-      setStatus(pasteStatus, 'NOTE: After copying, paste using <u>Keep Source Formatting</u> (if applicable).', 'neutral');
-      setStatus(downloadDocStatus, '', 'success');
-      validationNote.style.display = 'block';
-      setCopyReadyState(true);
-      setDownloadReadyState(true);
+        hasCurrentGeneratedSignatures = true;
+        if (announce) setStatus(formStatus, 'Signatures generated.', 'success');
+        newPreview.innerHTML = buildSignatureHtml('new');
+        replyPreview.innerHTML = buildSignatureHtml('reply');
+        [newPreview, replyPreview].forEach(preview => {
+          void preview.offsetWidth;
+          preview.classList.add('is-rendering');
+        });
+        clearCopyStatuses();
+        setStatus(pasteStatus, 'NOTE: After copying, paste using <u>Keep Source Formatting</u> (if applicable).', 'neutral');
+        setStatus(downloadDocStatus, '', 'success');
+        validationNote.style.display = 'block';
+        validationNote.classList.remove('note-pop');
+        void validationNote.offsetWidth;
+        validationNote.classList.add('note-pop');
+        setCopyReadyState(true);
+        setDownloadReadyState(true);
+      });
     }
 
     /* Any form/template change should be reviewed by generating again. */
@@ -1604,8 +1790,10 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const target = which === 'new' ? newPreview : replyPreview;
       const status = which === 'new' ? newStatus : replyStatus;
       if (!hasCurrentGeneratedSignatures || !target.innerHTML.trim()) {
-        clearCopyStatuses();
-        setStatus(status, 'Generate the signature first.', 'error');
+        withCardResizeAnimation(() => {
+          clearCopyStatuses(status);
+          setStatus(status, 'Generate the signature first.', 'error');
+        });
         return;
       }
 
@@ -1620,15 +1808,19 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
             'text/plain': new Blob([text], { type: 'text/plain' })
           });
           await navigator.clipboard.write([item]);
-          clearCopyStatuses();
-          showCopiedStatus(status);
+          withCardResizeAnimation(() => {
+            clearCopyStatuses(status);
+            showCopiedStatus(status);
+          });
           return;
         }
 
         throw new Error('Rich clipboard API unavailable');
       } catch (err) {
-        clearCopyStatuses();
-        setStatus(status, 'Browser limited rich copy. Select the signature and use Copy, then paste with Keep Source Formatting.', 'error');
+        withCardResizeAnimation(() => {
+          clearCopyStatuses(status);
+          setStatus(status, 'Browser limited rich copy. Select the signature and use Copy, then paste with Keep Source Formatting.', 'error');
+        });
       }
     }
 
