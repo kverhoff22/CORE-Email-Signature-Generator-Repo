@@ -244,7 +244,8 @@
        ========================= */
     .actions {
       display: flex;
-      gap: 10px;
+      justify-content: space-between;
+      gap: 18px;
       flex-wrap: wrap;
       margin-top: 18px;
     }
@@ -381,6 +382,20 @@
       background: #e8ecef;
       color: #111;
     }
+    #generateBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(0, 131, 72, 0.20);
+    }
+    #clearBtn {
+      background: #f6e6a6;
+      color: #2f2a16;
+      box-shadow: 0 6px 14px rgba(154, 122, 24, 0.12);
+    }
+    #clearBtn:hover {
+      transform: translateY(-1px);
+      background: #f0cf55;
+      box-shadow: 0 10px 18px rgba(154, 122, 24, 0.20);
+    }
     .sample-tools {
       /* Internal/testing helper sits outside the main form card on purpose */
       margin-top: 18px;
@@ -442,6 +457,27 @@
       border: 1px solid rgba(0, 131, 72, 0.18);
       background: linear-gradient(180deg, #eef9f2 0%, #e3f5ea 100%);
     }
+    @keyframes copiedStatusHop {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+      }
+      20% {
+        transform: translateY(-5px) scale(1.02);
+      }
+      40% {
+        transform: translateY(0) scale(1);
+      }
+      60% {
+        transform: translateY(-3px) scale(1.01);
+      }
+      80% {
+        transform: translateY(0) scale(1);
+      }
+    }
+    .status-copy-pop {
+      animation: copiedStatusHop 0.9s ease-out;
+      transform-origin: center bottom;
+    }
     .status-error {
       display: block;
       color: #b42318;
@@ -462,6 +498,13 @@
       font-family: "Segoe UI", Arial, sans-serif;
       color: var(--core-gray);
       line-height: 1.25;
+      transform-origin: left center;
+      transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
+    }
+    .sig-preview.is-clearing {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+      filter: blur(1px);
     }
     .sig-preview .name,
     .sig-preview .company {
@@ -527,7 +570,7 @@
           <button class="template-toggle-option" id="currentTemplateBtn" type="button" aria-pressed="true">Today</button>
           <button class="template-toggle-option" id="futureTemplateBtn" type="button" aria-pressed="false">Future</button>
         </div>
-        <div class="template-toggle-copy">Choose live templates or the future test set.</div>
+        <div class="template-toggle-copy">Choose current templates or the future test set.</div>
       </div>
     </div>
 
@@ -539,7 +582,7 @@
           <span class="template-warning-icon" aria-hidden="true">!</span>
         </div>
         <p class="template-warning-text">
-          These template designs are for developer review only and are not implemented for general use yet. Use Today for current production signatures.
+          These template designs are for developer review only and are not implemented for general use yet. Use *Today* for current signatures.
         </p>
         <div class="template-warning-actions">
           <button class="template-warning-ok" id="futureTemplateWarningOk" type="button">OK</button>
@@ -847,6 +890,8 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     const futureTemplateWarningOk = document.getElementById('futureTemplateWarningOk');
     const PENDING_PULSE_DURATION_MS = 2600;
     let hasShownFutureTemplateWarning = false;
+    let hasCurrentGeneratedSignatures = false;
+    let clearPreviewTimer = null;
 
     /* Basic text cleanup helpers */
     function collapseSpaces(value) {
@@ -949,7 +994,9 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
 
     includePostNominal.addEventListener('change', () => {
       syncDependentFields();
+      requireSignatureRegeneration();
     });
+    postNominal.addEventListener('input', requireSignatureRegeneration);
 
     /*
       Auto-capitalized terms used while title-casing job titles.
@@ -1091,6 +1138,8 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const ccgCompanyStyle = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: ${ccgGrey}; line-height: 1.25; margin: 0 0 2px 0;`;
       const ccgSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
       const ccgTodaySpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.25; margin: 0;">&nbsp;</div>`;
+      const friscoOfficePhone = "972-668-9340";
+      const ccgOfficePhone = friscoOfficePhone;
 
       // ----- The CORE Group template styles -----
       const theCoreGroupGrey = "rgb(77, 77, 77)";
@@ -1116,7 +1165,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const procedeoTodayBaseLine = `font-family: Calibri, Arial, sans-serif; font-size: 9pt; color: ${procedeoTodayGrey}; line-height: 1.15; margin: 0;`;
       const procedeoTodaySpacerLine = `<div style="font-family: Calibri, Arial, sans-serif; font-size: 9pt; line-height: 1.15; margin: 0;">&nbsp;</div>`;
       const procedeoTodayLogo = `<div style="font-family: 'Arial Black', Arial, sans-serif; font-size: 14pt; font-weight: 700; line-height: 1.15; margin: 0;"><span style="color: ${procedeoTodayGrey};">PR</span><span style="color: rgb(253, 206, 7);">O</span><span style="color: ${procedeoTodayGrey};">CEDEO</span></div>`;
-      const theCoreGroupOfficePhone = "972-214-2700";
+      const theCoreGroupOfficePhone = friscoOfficePhone;
 
       // PROCEDEO template branch
       if (activeConfig.templateType === 'procedeo') {
@@ -1161,7 +1210,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
                 <div style="${ccgTitleStyle}">${escapeHtml(title)}</div>
                 ${ccgTodaySpacerLine}
                 <div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: rgb(24, 75, 103); line-height: 1.25; margin: 0;">CCG Services, Inc.</div>
-              <div style="${ccgBaseLine}">P: XXX-XXX-XXXX | C: ${escapedCellDisplay}</div>
+              <div style="${ccgBaseLine}">P: ${ccgOfficePhone} | C: ${escapedCellDisplay}</div>
               ${type === 'new' ? `<div style="${ccgBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${ccgGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
             </div>
           `.trim();
@@ -1174,7 +1223,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
             ${ccgSpacerLine}
             <div style="${ccgCompanyStyle}">CCG Services, Inc.</div>
             ${type === 'new' ? `<div style="${ccgBaseLine}">Street Address | City, State Zip</div>` : ''}
-            <div style="${ccgBaseLine}">${type === 'new' ? `P: XXX-XXX-XXXX | C: ${escapedCellDisplay}` : `C: ${escapedCellDisplay}`}</div>
+            <div style="${ccgBaseLine}">${type === 'new' ? `P: ${ccgOfficePhone} | C: ${escapedCellDisplay}` : `C: ${escapedCellDisplay}`}</div>
             ${type === 'new' ? `<div style="${ccgBaseLine}">E: <a href="mailto:${escapeHtml(email)}" style="color: ${ccgGrey}; text-decoration: none;">${escapeHtml(email)}</a></div>` : ''}
           </div>
         `.trim();
@@ -1284,24 +1333,45 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       field.classList.add('invalid');
     }
 
+    /* Keep error messages focused so older errors do not linger elsewhere. */
+    function clearOtherErrorStatuses(activeStatus) {
+      [formStatus, newStatus, replyStatus, downloadDocStatus].forEach(statusEl => {
+        if (statusEl !== activeStatus && statusEl.classList.contains('status-error')) {
+          setStatus(statusEl, '', 'success');
+        }
+      });
+    }
+
     /* Show success / error / neutral status messages */
     function setStatus(el, text, type) {
+      if (text && type === 'error') {
+        clearOtherErrorStatuses(el);
+      }
+
       if (el === pasteStatus) {
         if (!text) {
           el.textContent = '';
-          el.classList.remove('status-success', 'status-error', 'status-neutral');
+          el.classList.remove('status-success', 'status-error', 'status-neutral', 'status-copy-pop');
           return;
         }
         el.innerHTML = text;
-        el.classList.remove('status-success', 'status-error', 'status-neutral');
+        el.classList.remove('status-success', 'status-error', 'status-neutral', 'status-copy-pop');
         el.classList.add(type === 'neutral' ? 'status-neutral' : (type === 'error' ? 'status-error' : 'status-success'));
         return;
       } else {
         el.textContent = text || '';
-        el.classList.remove('status-success', 'status-error', 'status-neutral');
+        el.classList.remove('status-success', 'status-error', 'status-neutral', 'status-copy-pop');
         if (!text) return;
       }
       el.classList.add(type === 'error' ? 'status-error' : 'status-success');
+    }
+
+    /* Give the copy confirmation a small two-hop motion when it appears. */
+    function showCopiedStatus(el) {
+      setStatus(el, 'Copied.', 'success');
+      el.classList.remove('status-copy-pop');
+      void el.offsetWidth;
+      el.classList.add('status-copy-pop');
     }
 
     /* Only keep one copy-status message visible at a time */
@@ -1322,7 +1392,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       downloadDocBtn.classList.toggle('download-ready', !!isReady);
     }
 
-    /* Toggle between current and future template sets; rendering still uses today's templates. */
+    /* Toggle between today's production templates and future preview templates. */
     function setTemplateMode(mode) {
       const isFuture = mode === 'future';
       currentTemplateMode = isFuture ? 'future' : 'current';
@@ -1331,10 +1401,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       futureTemplateBtn.setAttribute('aria-pressed', String(isFuture));
       populateStateOptions();
       syncDependentFields();
-
-      if (newPreview.innerHTML.trim() || replyPreview.innerHTML.trim()) {
-        generate();
-      }
+      requireSignatureRegeneration();
 
       if (isFuture && !hasShownFutureTemplateWarning) {
         hasShownFutureTemplateWarning = true;
@@ -1385,6 +1452,11 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
 
     /* Trigger the Word-compatible .doc download */
     function downloadWordDocument() {
+      if (!hasCurrentGeneratedSignatures || !newPreview.innerHTML.trim() || !replyPreview.innerHTML.trim()) {
+        setStatus(downloadDocStatus, 'Generate the signature first.', 'error');
+        return;
+      }
+
       const error = validate();
       if (error) {
         setStatus(formStatus, error, 'error');
@@ -1439,6 +1511,69 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       return '';
     }
 
+    /* Clear rendered signatures and immediately block stale copy/download actions. */
+    function clearGeneratedPreviews({ animate = false } = {}) {
+      hasCurrentGeneratedSignatures = false;
+      const previewEls = [newPreview, replyPreview];
+      const hasPreviewContent = previewEls.some(preview => preview.innerHTML.trim());
+
+      if (clearPreviewTimer) {
+        clearTimeout(clearPreviewTimer);
+        clearPreviewTimer = null;
+      }
+
+      clearCopyStatuses();
+      setStatus(formStatus, '', 'success');
+      setStatus(pasteStatus, '', 'success');
+      setStatus(downloadDocStatus, '', 'success');
+      validationNote.style.display = 'none';
+      setCopyReadyState(false);
+      setDownloadReadyState(false);
+
+      if (animate && hasPreviewContent) {
+        previewEls.forEach(preview => preview.classList.add('is-clearing'));
+        clearPreviewTimer = setTimeout(() => {
+          previewEls.forEach(preview => {
+            preview.innerHTML = '';
+            preview.classList.remove('is-clearing');
+          });
+          clearPreviewTimer = null;
+        }, 290);
+        return;
+      }
+
+      previewEls.forEach(preview => {
+        preview.innerHTML = '';
+        preview.classList.remove('is-clearing');
+      });
+    }
+
+    /* Render current input values into both previews. */
+    function renderGeneratedPreviews({ announce = false } = {}) {
+      if (clearPreviewTimer) {
+        clearTimeout(clearPreviewTimer);
+        clearPreviewTimer = null;
+      }
+      [newPreview, replyPreview].forEach(preview => preview.classList.remove('is-clearing'));
+
+      hasCurrentGeneratedSignatures = true;
+      if (announce) setStatus(formStatus, 'Signatures generated.', 'success');
+      newPreview.innerHTML = buildSignatureHtml('new');
+      replyPreview.innerHTML = buildSignatureHtml('reply');
+      clearCopyStatuses();
+      setStatus(pasteStatus, 'NOTE: After copying, paste using <u>Keep Source Formatting</u> (if applicable).', 'neutral');
+      setStatus(downloadDocStatus, '', 'success');
+      validationNote.style.display = 'block';
+      setCopyReadyState(true);
+      setDownloadReadyState(true);
+    }
+
+    /* Any form/template change should be reviewed by generating again. */
+    function requireSignatureRegeneration() {
+      if (!hasCurrentGeneratedSignatures && !newPreview.innerHTML.trim() && !replyPreview.innerHTML.trim()) return;
+      clearGeneratedPreviews({ animate: true });
+    }
+
     /* Generate both on-page signatures and update UI status/highlights */
     function generate() {
       const error = validate();
@@ -1446,14 +1581,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         setStatus(formStatus, error, 'error');
         return;
       }
-      setStatus(formStatus, 'Signatures generated.', 'success');
-      newPreview.innerHTML = buildSignatureHtml('new');
-      replyPreview.innerHTML = buildSignatureHtml('reply');
-      clearCopyStatuses();
-      setStatus(pasteStatus, 'NOTE: After copying, paste using <u>Keep Source Formatting</u> (if applicable).', 'neutral');
-      validationNote.style.display = 'block';
-      setCopyReadyState(true);
-      setDownloadReadyState(true);
+      renderGeneratedPreviews({ announce: true });
     }
 
     /* Populate a safe test profile for IT/admin spot checks */
@@ -1475,7 +1603,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     async function copySignature(which) {
       const target = which === 'new' ? newPreview : replyPreview;
       const status = which === 'new' ? newStatus : replyStatus;
-      if (!target.innerHTML.trim()) {
+      if (!hasCurrentGeneratedSignatures || !target.innerHTML.trim()) {
         clearCopyStatuses();
         setStatus(status, 'Generate the signature first.', 'error');
         return;
@@ -1493,7 +1621,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
           });
           await navigator.clipboard.write([item]);
           clearCopyStatuses();
-          setStatus(status, 'Copied.', 'success');
+          showCopiedStatus(status);
           return;
         }
 
@@ -1511,24 +1639,28 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       field.addEventListener('input', () => {
         if (collapseSpaces(field.value)) field.classList.remove('invalid');
         updatePendingStates();
+        requireSignatureRegeneration();
       });
     });
 
     city.addEventListener('change', () => {
       if (collapseSpaces(city.value)) city.classList.remove('invalid');
       updatePendingStates();
+      requireSignatureRegeneration();
     });
 
     cellPhone.addEventListener('input', () => {
       if (!collapseSpaces(cellPhone.value) || getPhoneDigits(cellPhone.value).length === 10) {
         cellPhone.classList.remove('invalid');
       }
+      requireSignatureRegeneration();
     });
 
     state.addEventListener('change', () => {
       if (collapseSpaces(state.value)) state.classList.remove('invalid');
       syncDependentFields();
       updatePendingStates();
+      requireSignatureRegeneration();
     });
 
     /* =========================
@@ -1566,15 +1698,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       populateStateOptions();
       syncDependentFields();
       cellPhone.value = '';
-      newPreview.innerHTML = '';
-      replyPreview.innerHTML = '';
-      setStatus(formStatus, '', 'success');
-      clearCopyStatuses();
-      setStatus(pasteStatus, '', 'success');
-      setStatus(downloadDocStatus, '', 'success');
-      validationNote.style.display = 'none';
-      setCopyReadyState(false);
-      setDownloadReadyState(false);
+      clearGeneratedPreviews({ animate: true });
       updatePendingStates();
     });
 
