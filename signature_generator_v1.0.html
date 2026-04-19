@@ -95,6 +95,7 @@
       padding: 18px;
       box-shadow: 0 4px 14px rgba(0,0,0,0.04);
     }
+    /* Applied only while JS animates card height after content changes. */
     .card.card-size-animating {
       overflow: hidden;
       will-change: height;
@@ -142,6 +143,7 @@
       box-shadow: inset 0 2px 4px rgba(24, 49, 43, 0.14), 0 1px 0 rgba(255,255,255,0.85);
       isolation: isolate;
     }
+    /* The sliding pill is a pseudo-element so the two buttons remain real buttons. */
     .template-toggle::before {
       content: "";
       position: absolute;
@@ -262,6 +264,7 @@
       cursor: pointer;
       transition: background-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
     }
+    /* Ready/not-ready classes keep actions clickable while making their state obvious. */
     .copy-ready {
       background: linear-gradient(180deg, #c9f0d7 0%, #08c852 100%);
       box-shadow: 0 0 0 3px rgba(0, 131, 72, 0.30), 0 8px 18px rgba(0, 131, 72, 0.14);
@@ -305,6 +308,7 @@
       line-height: 1.35;
       margin-top: 8px;
     }
+    /* Future-template modal shown once per page load when Future is selected. */
     .template-warning-overlay {
       position: fixed;
       inset: 0;
@@ -479,6 +483,7 @@
       border: 1px solid rgba(0, 131, 72, 0.18);
       background: linear-gradient(180deg, #eef9f2 0%, #e3f5ea 100%);
     }
+    /* Shared pop-in used by status boxes and the office-phone validation note. */
     @keyframes statusMessageIn {
       0% {
         opacity: 0;
@@ -494,6 +499,7 @@
     .status-pop {
       animation: statusMessageIn 0.24s ease-out;
     }
+    /* Copy confirmations get a small, slower hop so they feel distinct from errors. */
     @keyframes copiedStatusHop {
       0% {
         opacity: 0;
@@ -546,6 +552,7 @@
       transform-origin: left center;
       transition: opacity 0.28s ease, transform 0.28s ease, filter 0.28s ease;
     }
+    /* Signature previews animate in on Generate and fade out when inputs become stale. */
     @keyframes signaturePreviewIn {
       0% {
         opacity: 0;
@@ -742,6 +749,8 @@
     
     /* =========================
        EMBEDDED IMAGE ASSETS
+       Base64 logos keep this file portable and help copied signatures carry
+       their images into Outlook without needing external image hosting.
        ========================= */
 const PROCEDEO_LOGO = "data:image/png;base64,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";
 
@@ -958,11 +967,17 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     let cardResizeBatchDepth = 0;
     let cardResizeBatchBefore = null;
 
-    /* Smoothly resize cards after content/status changes without fighting inner animations. */
+    /*
+      Card resize animation wrapper:
+      - snapshot heights before a UI update
+      - let the DOM change normally
+      - animate only cards whose final height actually changed
+    */
     function snapshotCardHeights() {
       return new Map(animatedCards.map(card => [card, card.getBoundingClientRect().height]));
     }
 
+    /* Finish in-progress height animations before measuring again to prevent twitchy jumps. */
     function settleCardResizeAnimations() {
       animatedCards.forEach(card => {
         const animation = cardResizeAnimations.get(card);
@@ -986,6 +1001,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         const fromHeight = beforeHeights.get(card);
         const toHeight = card.getBoundingClientRect().height;
 
+        // Skip tiny/no-op changes and older browsers that do not support Web Animations.
         if (typeof card.animate !== 'function' || !Number.isFinite(fromHeight) || !Number.isFinite(toHeight) || Math.abs(fromHeight - toHeight) < 1.5) {
           return;
         }
@@ -1030,6 +1046,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         return callback();
       }
 
+      // Nested calls share one outer measurement so several status changes animate as one.
       const isOuterBatch = cardResizeBatchDepth === 0;
       if (isOuterBatch) {
         settleCardResizeAnimations();
@@ -1054,7 +1071,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       return String(value || '').replace(/\s+/g, ' ').trim();
     }
 
-    /* Build the State/Group dropdown options */
+    /* Build the State/Group dropdown options, adding "(future)" labels in Future mode. */
     function populateStateOptions() {
       const previousValue = state.value;
       state.innerHTML = '<option value="" selected disabled hidden>Select</option>';
@@ -1096,7 +1113,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       return stateConfigs[state.value] || null;
     }
 
-    /* Get the final active config, merging in the selected city when needed */
+    /* Get the final active config, merging in selected city phone/address data when needed. */
     function getSelectedLocationConfig() {
       const config = getSelectedConfig();
       if (!config) return null;
@@ -1105,7 +1122,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       return selectedCity ? { ...config, ...selectedCity } : config;
     }
 
-    /* Enable / disable dependent fields when State/Group changes */
+    /* Enable / disable fields whose meaning depends on the selected State/Group. */
     function syncDependentFields() {
       const config = getSelectedConfig();
 
@@ -1252,11 +1269,11 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
 
     /* =========================
        SIGNATURE RENDERING
-       This is the main renderer that outputs the final
-       HTML for the Compose / Reply signature previews.
+       Builds the HTML that is shown in the preview boxes, copied to Outlook,
+       and inserted into the downloadable Word-compatible document.
        ========================= */
     function buildSignatureHtml(type) {
-      // activeConfig includes both the selected group and the selected city/office data.
+      // activeConfig includes both the selected group and selected city/office data.
       const activeConfig = getSelectedLocationConfig();
       const name = buildName(employeeName.value, includePostNominal.checked ? postNominal.value : '');
       const title = toTitleCase(jobTitle.value, JOB_TITLE_CAPITALIZED_TERMS);
@@ -1267,7 +1284,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const escapedCellDisplay = escapeHtml(cellDisplay);
       const isFutureTemplateMode = currentTemplateMode === 'future';
 
-      // ----- CORE default template styles -----
+      // ----- CORE default template styles used by state/location templates -----
       const coreBaseLine = "font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: rgb(77, 77, 77); line-height: 1.25; margin: 0;";
       const coreNameStyle = "font-family: 'Segoe UI', Arial, sans-serif; font-size: 10pt; font-weight: 700; color: rgb(77, 77, 77); line-height: 1.25; margin: 0 0 2px 0;";
       const coreTitleStyle = "font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: rgb(77, 77, 77); line-height: 1.25; margin: 0;";
@@ -1275,7 +1292,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const coreContainerStyle = "font-family: 'Segoe UI', Arial, sans-serif; color: rgb(77, 77, 77); line-height: 1.25;";
       const coreSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
 
-      // ----- Glenn Allen template styles -----
+      // ----- Glenn Allen template styles, unchanged by Today/Future mode -----
       const gaGrey = "rgb(65, 64, 66)";
       const gaRed = "rgb(186, 32, 37)";
       const gaBaseLine = `font-family: Helvetica, Arial, sans-serif; font-size: 9pt; color: ${gaGrey}; line-height: 1.2; margin: 0;`;
@@ -1285,7 +1302,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const gaSubStyle = `font-family: Helvetica, Arial, sans-serif; font-size: 9pt; font-weight: 700; color: ${gaGrey}; line-height: 1.2; margin: 0;`;
       const gaSpacerLine = `<div style="font-family: Helvetica, Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
 
-      // ----- CCG template styles -----
+      // ----- CCG template styles; Today and Future use separate layouts below -----
       const ccgGrey = "rgb(77, 77, 77)";
       const ccgSoftGrey = "rgb(189, 190, 192)";
       const ccgBaseLine = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${ccgGrey}; line-height: 1.25; margin: 0;`;
@@ -1297,7 +1314,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const friscoOfficePhone = "972-668-9340";
       const ccgOfficePhone = friscoOfficePhone;
 
-      // ----- The CORE Group template styles -----
+      // ----- The CORE Group template styles; Today and Future use separate layouts below -----
       const theCoreGroupGrey = "rgb(77, 77, 77)";
       const theCoreGroupSoftGrey = "rgb(189, 190, 192)";
       const theCoreGroupBaseLine = `font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; color: ${theCoreGroupGrey}; line-height: 1.25; margin: 0;`;
@@ -1307,7 +1324,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const theCoreGroupSpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.0; margin: 0;">&nbsp;</div>`;
       const theCoreGroupTodaySpacerLine = `<div style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 9pt; line-height: 1.25; margin: 0;">&nbsp;</div>`;
 
-      // ----- PROCEDEO template styles -----
+      // ----- PROCEDEO template styles; Today and Future use separate layouts below -----
       const procedeoGrey = "rgb(101, 102, 101)";
       const procedeoNameStyle = `font-family: Calibri, Arial, sans-serif; font-size: 12pt; font-weight: 700; color: ${procedeoGrey}; line-height: 1.15; margin: 0;`;
       const procedeoTitleStyle = `font-family: Calibri, Arial, sans-serif; font-size: 12pt; color: ${procedeoGrey}; line-height: 1.15; margin: 0;`;
@@ -1323,7 +1340,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const procedeoTodayLogo = `<div style="font-family: 'Arial Black', Arial, sans-serif; font-size: 14pt; font-weight: 700; line-height: 1.15; margin: 0;"><span style="color: ${procedeoTodayGrey};">PR</span><span style="color: rgb(253, 206, 7);">O</span><span style="color: ${procedeoTodayGrey};">CEDEO</span></div>`;
       const theCoreGroupOfficePhone = friscoOfficePhone;
 
-      // PROCEDEO template branch
+      // PROCEDEO is one of the templates that changes between Today and Future mode.
       if (activeConfig.templateType === 'procedeo') {
         if (!isFutureTemplateMode) {
           return `
@@ -1340,7 +1357,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
           `.trim();
         }
 
-        // Future PROCEDEO is intentionally kept close to the accepted v38/v43 layout.
+        // Future PROCEDEO uses the newer logo-based test layout.
         const composeLine = type === 'new'
           ? `T: ${procedeoOfficePhone} | C: ${escapedCellDisplay} | www.procedeogroup.com`
           : `C: ${escapedCellDisplay} | www.procedeogroup.com`;
@@ -1357,7 +1374,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         `.trim();
       }
 
-      // CCG template branch
+      // CCG is one of the templates that changes between Today and Future mode.
       if (activeConfig.templateType === 'ccg') {
         if (!isFutureTemplateMode) {
           return `
@@ -1385,7 +1402,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         `.trim();
       }
 
-      // The CORE Group template branch
+      // The CORE Group is one of the templates that changes between Today and Future mode.
       if (activeConfig.templateType === 'theCoreGroup') {
         if (!isFutureTemplateMode) {
           return `
@@ -1413,7 +1430,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         `.trim();
       }
 
-      // Glenn Allen template branch
+      // Glenn Allen keeps one template regardless of Today/Future mode.
       if (activeConfig.templateType === 'glennAllen') {
         return `
           <div style="font-family: Helvetica, Arial, sans-serif; color: ${gaGrey}; line-height: 1.2;">
@@ -1429,7 +1446,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       }
 
       const officePhone = activeConfig.phone || activeConfig.fixedPhone || 'XXX-XXX-XXXX';
-      // CORE default contact lines differ between compose and reply signatures.
+      // Default CORE contact lines differ between compose and reply signatures.
       const contactLine = type === 'new'
         ? `${activeConfig.officePhoneLabel || 'P'}: ${officePhone} | C: ${cellDisplay} | W: ${activeConfig.website}`
         : `C: ${cellDisplay} | W: ${activeConfig.website}`;
@@ -1505,7 +1522,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       el.classList.add('status-pop');
     }
 
-    /* Show success / error / neutral status messages */
+    /* Show success / error / neutral status messages and replay their entrance motion. */
     function setStatus(el, text, type) {
       return withCardResizeAnimation(() => {
         if (text && type === 'error') {
@@ -1513,6 +1530,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         }
 
         if (el === pasteStatus) {
+          // pasteStatus can include the underlined "Keep Source Formatting" note.
           if (!text) {
             el.textContent = '';
             el.classList.remove('status-success', 'status-error', 'status-neutral', 'status-pop', 'status-copy-pop');
@@ -1541,13 +1559,13 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       el.classList.add('status-copy-pop');
     }
 
-    /* Only keep one copy-status message visible at a time */
+    /* Only keep one copy-status message visible at a time; preserve the active one. */
     function clearCopyStatuses(exceptStatus = null) {
       if (newStatus !== exceptStatus) setStatus(newStatus, '', 'success');
       if (replyStatus !== exceptStatus) setStatus(replyStatus, '', 'success');
     }
 
-    /* Green highlight on copy buttons after signatures are generated */
+    /* Toggle copy-button visuals without disabling clicks; clicks still show helpful errors. */
     function setCopyReadyState(isReady) {
       [copyNewBtn, copyReplyBtn].forEach(btn => {
         btn.classList.toggle('copy-ready', !!isReady);
@@ -1555,7 +1573,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       });
     }
 
-    /* Blue highlight on download button after signatures are generated */
+    /* Toggle download-button visuals without disabling clicks; clicks still show helpful errors. */
     function setDownloadReadyState(isReady) {
       downloadDocBtn.classList.toggle('download-ready', !!isReady);
       downloadDocBtn.classList.toggle('download-not-ready', !isReady);
@@ -1572,6 +1590,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       syncDependentFields();
       requireSignatureRegeneration();
 
+      // The warning appears only once per page load so the toggle does not nag.
       if (isFuture && !hasShownFutureTemplateWarning) {
         hasShownFutureTemplateWarning = true;
         futureTemplateWarning.hidden = false;
@@ -1590,10 +1609,10 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         .replace(/[^A-Za-z0-9\s_-]/g, '')
         .trim()
         .replace(/\s+/g, '_');
-      return clean || 'CORE_Signatures';
+      return clean || 'Email_Signatures';
     }
 
-    /* Build the downloadable Word-compatible HTML document */
+    /* Build an HTML document saved with .doc so Word can open it directly. */
     function buildWordDocumentHtml() {
       const newSig = buildSignatureHtml('new');
       const replySig = buildSignatureHtml('reply');
@@ -1619,7 +1638,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
 </html>`;
     }
 
-    /* Trigger the Word-compatible .doc download */
+    /* Trigger the Word-compatible .doc download after confirming fresh signatures exist. */
     function downloadWordDocument() {
       if (!hasCurrentGeneratedSignatures || !newPreview.innerHTML.trim() || !replyPreview.innerHTML.trim()) {
         setStatus(downloadDocStatus, 'Generate the signature first.', 'error');
@@ -1640,7 +1659,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${sanitizeFileName(employeeName.value)}_CORE_Signatures.doc`;
+      link.download = `${sanitizeFileName(employeeName.value)}_Email_Signatures.doc`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -1649,7 +1668,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       setStatus(downloadDocStatus, 'Downloaded Word document.', 'success');
     }
 
-    /* Validate required inputs before generate / download */
+    /* Validate required inputs before generate / download and mark the field that needs attention. */
     function validate() {
       clearInvalidStates();
 
@@ -1702,6 +1721,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
         setDownloadReadyState(false);
 
         if (animate && hasPreviewContent) {
+          // Let the preview fade/slide away before removing its HTML and resizing the card.
           previewEls.forEach(preview => {
             preview.classList.remove('is-rendering');
             preview.classList.add('is-clearing');
@@ -1725,7 +1745,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       });
     }
 
-    /* Render current input values into both previews. */
+    /* Render current input values into both previews and restore copy/download readiness. */
     function renderGeneratedPreviews({ announce = false } = {}) {
       return withCardResizeAnimation(() => {
         if (clearPreviewTimer) {
@@ -1754,7 +1774,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       });
     }
 
-    /* Any form/template change should be reviewed by generating again. */
+    /* Any form/template change makes the existing previews stale, so require Generate again. */
     function requireSignatureRegeneration() {
       if (!hasCurrentGeneratedSignatures && !newPreview.innerHTML.trim() && !replyPreview.innerHTML.trim()) return;
       clearGeneratedPreviews({ animate: true });
@@ -1786,6 +1806,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
       generate();
     }
 
+    /* Copy the selected preview as rich HTML first, falling back to a user-facing error. */
     async function copySignature(which) {
       const target = which === 'new' ? newPreview : replyPreview;
       const status = which === 'new' ? newStatus : replyStatus;
