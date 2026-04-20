@@ -201,22 +201,11 @@
       background: #fff;
       transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
     }
-    @keyframes pendingPulse {
-      0%, 100% {
-        border-color: #e2edfb;
-        background: #f8fafd;
-        box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.08);
-      }
-      50% {
-        border-color: #9fc9fb;
-        background: #eaf4ff;
-        box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.14);
-      }
-    }
     input.pending, select.pending {
-      /* JS sets the delay variable so all active pending fields pulse together */
-      animation: pendingPulse 2.6s ease-in-out infinite;
-      animation-delay: var(--pending-animation-delay, 0ms);
+      /* JS drives one shared pulse value on :root so fields cannot drift apart. */
+      border-color: var(--pending-border-color, #e2edfb);
+      background: var(--pending-bg-color, #f8fafd);
+      box-shadow: 0 0 0 3px rgba(24, 119, 242, var(--pending-shadow-alpha, 0.08));
     }
     input.invalid, select.invalid {
       border-color: #d92d20;
@@ -958,6 +947,7 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     const futureTemplateWarning = document.getElementById('futureTemplateWarning');
     const futureTemplateWarningOk = document.getElementById('futureTemplateWarningOk');
     const PENDING_PULSE_DURATION_MS = 2600;
+    let pendingPulseFrame = null;
     let hasShownFutureTemplateWarning = false;
     let hasCurrentGeneratedSignatures = false;
     let clearPreviewTimer = null;
@@ -1465,15 +1455,56 @@ const PROCEDEO_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAZCAY
     }
 
     /*
-      Keep all pending-field pulse animations in the same phase. Without this,
-      fields can drift out of sync when classes are added at different times.
+      Keep all pending fields pulsing from one shared clock.
+      A previous version tried to sync separate CSS animations with negative
+      delays, but fields could still drift when one was removed and re-added.
     */
-    function syncPendingPulsePhase() {
+    function getPendingFields() {
+      return [employeeName, jobTitle, state, city].filter(field => field.classList.contains('pending'));
+    }
+
+    function interpolateNumber(start, end, amount) {
+      return start + ((end - start) * amount);
+    }
+
+    function interpolateRgb(start, end, amount) {
+      const channels = start.map((value, index) => Math.round(interpolateNumber(value, end[index], amount)));
+      return `rgb(${channels.join(', ')})`;
+    }
+
+    function setPendingPulseVariables(amount) {
+      document.documentElement.style.setProperty('--pending-border-color', interpolateRgb([226, 237, 251], [159, 201, 251], amount));
+      document.documentElement.style.setProperty('--pending-bg-color', interpolateRgb([248, 250, 253], [234, 244, 255], amount));
+      document.documentElement.style.setProperty('--pending-shadow-alpha', interpolateNumber(0.08, 0.14, amount).toFixed(3));
+    }
+
+    function stopPendingPulse() {
+      if (pendingPulseFrame !== null) {
+        cancelAnimationFrame(pendingPulseFrame);
+        pendingPulseFrame = null;
+      }
+      setPendingPulseVariables(0);
+    }
+
+    function updatePendingPulse() {
+      if (!getPendingFields().length) {
+        stopPendingPulse();
+        return;
+      }
+
       const now = (window.performance && window.performance.now) ? window.performance.now() : Date.now();
-      const delay = -(now % PENDING_PULSE_DURATION_MS);
-      [employeeName, jobTitle, state, city].forEach(field => {
-        field.style.setProperty('--pending-animation-delay', `${delay}ms`);
-      });
+      const phase = (now % PENDING_PULSE_DURATION_MS) / PENDING_PULSE_DURATION_MS;
+      const amount = (1 - Math.cos(phase * Math.PI * 2)) / 2;
+      setPendingPulseVariables(amount);
+      pendingPulseFrame = requestAnimationFrame(updatePendingPulse);
+    }
+
+    function syncPendingPulsePhase() {
+      if (getPendingFields().length) {
+        if (pendingPulseFrame === null) updatePendingPulse();
+      } else {
+        stopPendingPulse();
+      }
     }
 
     /* Highlight required fields that still need input */
